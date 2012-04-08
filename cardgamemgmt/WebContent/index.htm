@@ -2,9 +2,14 @@
 <html>
 <head>
 <title>Game</title>
+<!--
 <link href="lib/dojo/resources/dojo.css" rel="stylesheet">
 <link href="lib/dijit/themes/tundra/tundra.css" rel="stylesheet">
 <link href="lib/dojox/grid/resources/tundraGrid.css" rel="stylesheet">
+-->
+<link href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" rel="stylesheet">
+<link href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/tundra/tundra.css" rel="stylesheet">
+<link href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojox/grid/resources/tundraGrid.css" rel="stylesheet">
 <link href="themes/game.css" rel="stylesheet">
 <!-- switch the commented lines below if using local dojo libraries -->
 <!-- <script data-dojo-config="async:true" src="lib/dojo/dojo.js"></script> -->
@@ -19,7 +24,6 @@ var cardWidth, cardHeight, sizePercent;
 var headerHeight, playerHeight, footerHeight;
 var cardMinHeight, cardMinWidth, footerMinHeight;
 var maxX, maxY;
-var tmpFront, tmpCard, tmpMnode; /* TODO delete */
 var initCardWidth, initCardHeight;
 require([
   "dojo/dom-construct",
@@ -27,8 +31,9 @@ require([
   "dojo/dnd/Moveable",
   "dojo/query"
   ], function(domConstruct,domClass){
-  //findWindowVars();
-  maxX = (window.innerWidth/2);maxY = (window.innerHeight/2);
+  maxX = (window.innerWidth/2);
+  maxY = (window.innerHeight/2);
+  dc = domClass; // variable needed to setting timeout on card flip toggle
   setCardVars();
   setAreaVars();
   function createCard(id,image){
@@ -45,9 +50,6 @@ require([
     var front = domConstruct.create("div",{
       style:"height:"+cardHeight+"px;width:"+cardWidth+"px;background-image:url('"+image+"');background-position:center center;background-repeat:no-repeat;background-size:100%;",
     });
-    /* TODO delete */
-    tmpCard = card;
-    tmpFront = front;
     domClass.add(front,"front");
     domConstruct.place(front,card);
     var back = domConstruct.create("div",{
@@ -71,24 +73,29 @@ require([
     thisCard.xPercent=xVar/maxX;
     thisCard.yPercent=yVar/maxY;
   }
-  dc = domClass; // variable needed to setting timeout on card flip toggle
+  for(var i=0;i<7;i++){
+    var rnum = Math.floor((Math.random()*120)+1);
+    if(rnum.toString().length == 1) rnum = "00"+rnum;
+    if(rnum.toString().length == 2) rnum = "0"+rnum;
+    var thisCard = createCard("g0001p0002c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg");
+    domClass.add(thisCard,"opponent");
+    domClass.add(thisCard.firstElementChild,"behind");
+    domClass.remove(thisCard.lastElementChild,"behind");
+    domConstruct.place(thisCard,"gameArea");
+    var xVar=(window.innerWidth/7*i+cardWidth/2)-window.innerWidth*.5;
+    var yVar = 1*dojo.byId("opponentArea").style.top.substring(0,dojo.byId("opponentArea").style.top.length-2)+10;
+    thisCard.style.left=xVar+"px";
+    thisCard.style.top=yVar+"px";
+    thisCard.xPercent=xVar/maxX;
+    thisCard.yPercent=yVar/maxY;
+  }
   dojo.query(".card").forEach(function(node,index,arr){
     var mnode = dojo.dnd.Moveable(node);
-    tmpMnode = mnode;
     dojo.connect(node,"onmouseover",function(evt){ /* TODO */ });
     dojo.connect(node,"onmouseout",function(){ /* TODO */ });
     dojo.connect(node,"onclick",function(){ /* TODO onclick event only needs to make the card glow at this point */ });
     dojo.connect(node,"ondblclick",function(){
-      front = dojo.query(".front",dojo.byId(node.id))[0];
-      back = dojo.query(".back",dojo.byId(node.id))[0];
-      if( node.firstElementChild.className.indexOf("behind") == -1 ) {
-        domClass.toggle(front,"toback");
-        domClass.toggle(back,"tofront");
-      } else {
-    	domClass.toggle(front,"tofront");
-        domClass.toggle(back,"toback");
-      }
-      window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');", 1000);
+      flipCard(node);
     }); // end ondblclick
     dojo.connect(mnode, "onMoving", function(){ /* TODO */ }); // end onMoving
     dojo.connect(dojo.byId("gameArea"), "onmousemove", function(){ /* TODO */ }); // end onMoving
@@ -149,22 +156,32 @@ function setAreaVars(){
   headerHeight = window.innerHeight * .08;
   playerHeight = (window.innerHeight - headerHeight - footerHeight) / 2;
   //console.log(playerHeight);
-  var top = window.innerHeight*.5;
-  var left = window.innerWidth*.5;
-  //console.log(top+" / "+left);
-  document.getElementById("header").style.height = headerHeight+"px";
-  document.getElementById("opponentArea").style.height = playerHeight+"px";
-  document.getElementById("playerArea").style.height = playerHeight+"px";
+  //console.log(maxY+" / "+maxX);
   document.getElementById("footer").style.height = footerHeight+"px";
-  document.getElementById("footer").style.minHeight = footerMinHeight+"px";
-  document.getElementById("footer").style.left = "-"+left+"px";
-  document.getElementById("playerArea").style.left = "-"+left+"px";
-  document.getElementById("opponentArea").style.left = "-"+left+"px";
-  document.getElementById("header").style.left = "-"+left+"px";
-  document.getElementById("footer").style.top = (top-document.getElementById("footer").clientHeight)+"px";
-  document.getElementById("playerArea").style.top = "0px";
-  document.getElementById("opponentArea").style.top = "-"+document.getElementById("opponentArea").clientHeight+"px";
-  document.getElementById("header").style.top = "-"+top+"px";
+  //document.getElementById("footer").style.minHeight = footerMinHeight+"px";
+  document.getElementById("footer").style.left = "-"+maxX+"px";
+  document.getElementById("footer").style.top = (maxY-document.getElementById("footer").clientHeight)+"px";
+  document.getElementById("playerArea").style.height = playerHeight+"px";
+  document.getElementById("playerArea").style.left = "-"+maxX+"px";
+  document.getElementById("playerArea").style.top = "-"+(footerHeight+playerHeight-maxY)+"px";
+  document.getElementById("opponentArea").style.height = playerHeight+"px";
+  document.getElementById("opponentArea").style.left = "-"+maxX+"px";
+  document.getElementById("opponentArea").style.top = "-"+(footerHeight+(playerHeight*2)-maxY)+"px";
+  document.getElementById("header").style.height = headerHeight+"px";
+  document.getElementById("header").style.left = "-"+maxX+"px";
+  document.getElementById("header").style.top = "-"+maxY+"px";
+}
+function flipCard( node ){
+  front = node.firstElementChild;
+  back = node.lastElementChild;
+  if( front.className.indexOf("behind") == -1 ) {
+    dc.toggle(front,"toback");
+    dc.toggle(back,"tofront");
+  } else {
+    dc.toggle(front,"tofront");
+    dc.toggle(back,"toback");
+  }
+  window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');", 1000);
 }
 </script>
 </head>
