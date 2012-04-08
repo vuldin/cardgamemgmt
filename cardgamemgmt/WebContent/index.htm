@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Game</title>
+<link href="lib/dojo/resources/dojo.css" rel="stylesheet">
+<link href="lib/dijit/themes/tundra/tundra.css" rel="stylesheet">
+<link href="lib/dojox/grid/resources/tundraGrid.css" rel="stylesheet">
+<link href="themes/game.css" rel="stylesheet">
+<script data-dojo-config="async:true" src="lib/dojo/dojo.js"></script>
+<script>
+var foo;
+var dc;
+var front;
+var back;
+var timer;
+var hoverok;
+var cardWidth, cardHeight;
+var headerHeight, playerHeight, footerHeight;
+var cardMinHeight, cardMinWidth, footerMinHeight;
+var lastHeight,lastWidth;
+require([
+  "dojo/dom-construct",
+  "dojo/dom-class",
+  //"dojox/timing",
+  "dojo/dnd/Moveable",
+  "dojo/query"
+  //"dojo/domReady!"
+  ], function(domConstruct,domClass){
+  setMinVars();
+  setCardVars();
+  setAreaVars();
+/*
+  timer = new dojox.timing.Timer(2000);
+  timer.start();
+  timer.onTick = function(){
+    console.log("hover ready");
+    hoverok = true;
+  }
+*/
+  function createCard(id,image){
+    var card = domConstruct.create("div",{
+      id:id,
+      //style:"height:"+cardHeight+"px;width:"+cardWidth+"px;min-height:"+cardMinHeight+"px;min-width:"+cardMinWidth+"px;",
+      style:"height:"+cardHeight+"px;width:"+cardWidth+"px;",
+    });
+    domClass.add(card,"card");
+    var front = domConstruct.create("div",{
+      style:"height:"+cardHeight+"px;width:"+cardWidth+"px;background-image:url('"+image+"');background-position:center center;background-repeat:no-repeat;background-size:100%;",
+    });
+    domClass.add(front,"front");
+    domConstruct.place(front,card);
+    var back = domConstruct.create("div",{
+      style:"height:"+cardHeight+"px;width:"+cardWidth+"px;background-image:url('"+location.href+"images/back.jpg');background-position:center center;background-repeat:no-repeat;background-size:100%;",
+    });
+    domClass.add(back,"back behind");
+    domConstruct.place(back,card);
+    return card;
+  }
+  // for fun, create some cards
+  // player
+  for(var i=0;i<1;i++){
+    var rnum = Math.floor((Math.random()*120)+1);
+    if(rnum.toString().length == 1) rnum = "00"+rnum;
+    if(rnum.toString().length == 2) rnum = "0"+rnum;
+    domConstruct.place(createCard("g0001p0001c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg"),"gameArea");
+    //console.log((window.innerHeight/7)*6+cardWidth/2);
+    dojo.byId("g0001p0001c000"+(i+1)).style.left=((window.innerWidth/7*i+cardWidth/2)-window.innerWidth*.5)+"px";
+    dojo.byId("g0001p0001c000"+(i+1)).style.top=((window.innerHeight-cardHeight-10)-window.innerHeight*.5)+"px";
+    var topVar, maxTop = null;
+    var leftVar, maxLeft = null;
+    if( dojo.byId("g0001p0001c000"+(i+1)).style.top.charAt(0)== "-") maxTop = "-"+ window.innerHeight/2;
+    else maxTop = window.innerHeight/2;
+    if( dojo.byId("g0001p0001c000"+(i+1)).style.left.charAt(0)== "-") maxLeft = "-"+ window.innerWidth/2;
+    else maxLeft = window.innerWidth/2;
+    topVar=dojo.byId("g0001p0001c000"+(i+1)).style.top.substring(0,dojo.byId("g0001p0001c000"+(i+1)).style.top.length-2);
+    leftVar=dojo.byId("g0001p0001c000"+(i+1)).style.left.substring(0,dojo.byId("g0001p0001c000"+(i+1)).style.left.length-2);
+    dojo.byId("g0001p0001c000"+(i+1)).xPos=leftVar/maxLeft;
+    dojo.byId("g0001p0001c000"+(i+1)).yPos=topVar/maxTop;
+    var topVar, maxTop = null;
+    var leftVar, maxLeft = null;
+    topVar=dojo.byId("g0001p0001c000"+(i+1)).style.top.substring(0,dojo.byId("g0001p0001c000"+(i+1)).style.top.length-2);
+    leftVar=dojo.byId("g0001p0001c000"+(i+1)).style.left.substring(0,dojo.byId("g0001p0001c000"+(i+1)).style.left.length-2);
+    if( dojo.byId("g0001p0001c000"+(i+1)).style.top.charAt(0)== "-"){
+      maxTop = "-"+ window.innerHeight/2;
+      dojo.byId("g0001p0001c000"+(i+1)).yPos="-"+topVar/maxTop;
+    }
+    else {
+      maxTop = window.innerHeight/2;
+      dojo.byId("g0001p0001c000"+(i+1)).yPos=topVar/maxTop;
+    }
+    if( dojo.byId("g0001p0001c000"+(i+1)).style.left.charAt(0)== "-"){
+      maxLeft = "-"+ window.innerWidth/2;
+      dojo.byId("g0001p0001c000"+(i+1)).xPos="-"+leftVar/maxLeft;
+    }
+    else {
+      maxLeft = window.innerWidth/2;
+      dojo.byId("g0001p0001c000"+(i+1)).xPos=leftVar/maxLeft;
+    }
+  }
+  // opponent
+  for(var i=0;i<1;i++){
+    var rnum = Math.floor((Math.random()*120)+1);
+    if(rnum.toString().length == 1) rnum = "00"+rnum;
+    if(rnum.toString().length == 2) rnum = "0"+rnum;
+    domConstruct.place(createCard("g0001p0002c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg"),"gameArea");
+    //console.log((window.innerHeight/7)*6+cardWidth/2);
+    domClass.add(dojo.byId("g0001p0002c000"+(i+1)),"opponent");
+    dojo.byId("g0001p0002c000"+(i+1)).style.left=((window.innerWidth/7*i+cardWidth/2)-window.innerWidth*.5)+"px";
+    dojo.byId("g0001p0002c000"+(i+1)).style.top=10-window.innerHeight*.5+"px";
+    var topVar, maxTop = null;
+    var leftVar, maxLeft = null;
+    topVar=dojo.byId("g0001p0002c000"+(i+1)).style.top.substring(0,dojo.byId("g0001p0002c000"+(i+1)).style.top.length-2);
+    leftVar=dojo.byId("g0001p0002c000"+(i+1)).style.left.substring(0,dojo.byId("g0001p0002c000"+(i+1)).style.left.length-2);
+    if( dojo.byId("g0001p0002c000"+(i+1)).style.top.charAt(0)== "-"){
+      maxTop = "-"+ window.innerHeight/2;
+      dojo.byId("g0001p0002c000"+(i+1)).yPos="-"+topVar/maxTop;
+    }
+    else {
+      maxTop = window.innerHeight/2;
+      dojo.byId("g0001p0002c000"+(i+1)).yPos=topVar/maxTop;
+    }
+    if( dojo.byId("g0001p0002c000"+(i+1)).style.left.charAt(0)== "-"){
+      maxLeft = "-"+ window.innerWidth/2;
+      dojo.byId("g0001p0002c000"+(i+1)).xPos="-"+leftVar/maxLeft;
+    }
+    else {
+      maxLeft = window.innerWidth/2;
+      dojo.byId("g0001p0002c000"+(i+1)).xPos=leftVar/maxLeft;
+    }
+    //dojo.byId("g0001p0002c000"+(i+1)).xPos=(leftVar+cardWidth/2)/maxLeft;
+    
+    
+  }
+  dc = domClass; // variable needed to setting timeout on card flip toggle
+  dojo.query(".card").forEach(function(node,index,arr){
+    foo = node;
+    var mnode = dojo.dnd.Moveable(node);
+    dojo.connect(node,"onmouseover",function(evt){
+      //console.log("onmouseover");
+      // TODO wait until mousemove event has not been triggered for 2 seconds
+      //domClass.add(dojo.query(".front",dojo.byId(node.id))[0],"hover");
+/*
+      var nodeFront = dojo.query(".front",dojo.byId(node.id))[0];
+      if(nodeFront.className.indexOf("behind") == -1)domClass.add(nodeFront,"hover");
+*/
+    });
+    dojo.connect(node,"onmouseout",function(){
+      //console.log("onmouseout");
+      //domClass.remove(dojo.query(".front",dojo.byId(node.id))[0],"hover");
+/*
+      hoverok = false;
+      timer.start();
+*/
+    });
+    dojo.connect(node,"onclick",function(){
+      // TODO onclick event only needs to make the card glow at this point
+      //var nodeFront = dojo.query(".front",dojo.byId(node.id))[0];
+      //if(nodeFront.className.indexOf("behind") == -1)domClass.toggle(nodeFront,"expand");
+    });
+    dojo.connect(node,"ondblclick",function(){
+      front = dojo.query(".front",dojo.byId(node.id))[0];
+      back = dojo.query(".back",dojo.byId(node.id))[0];
+      if( node.firstElementChild.className.indexOf("behind") == -1 ) {
+        domClass.toggle(front,"toback");
+        domClass.toggle(back,"tofront");
+      } else {
+    	domClass.toggle(front,"tofront");
+        domClass.toggle(back,"toback");
+      }
+      window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');", 1000);
+    }); // end ondblclick
+    window.onresize = function(){
+      //var heightX = lastHeight/window.innerHeight;
+      //var widthX = lastWidth/window.innerWidth;
+      //console.log("multipliers shouldn't change on resize");
+      //console.log("height multiplier: "+(lastHeight/window.innerHeight));
+      //console.log("width multiplier: "+(lastWidth/window.innerWidth));
+      setCardVars();
+      setAreaVars();
+      //dojo.query(".card", ".front", ".back").forEach(function(node,index,arr){
+      dojo.query(".card", ".front", ".back").forEach(function(node,index,arr){
+        //console.log(node.xPos+" / "+node.yPos);
+        //console.log("x: "+window.innerWidth+"/2*"+node.xPos);
+        //console.log("y: "+window.innerHeight+"/2*"+node.yPos);
+        node.style.left = (window.innerWidth / 2 ) * node.xPos+"px";
+        node.style.top = (window.innerHeight / 2 ) * node.yPos+"px";
+        //console.log(node.style.left+" / "+node.style.top);
+/*
+        var topVar, maxTop = null;
+        var leftVar, maxLeft = null;
+        if(node.style.top.charAt(0)== "-") maxTop = "-"+ window.innerHeight/2;
+        else maxTop = window.innerHeight/2;
+        if(node.style.left.charAt(0)== "-") maxLeft = "-"+ window.innerWidth/2;
+        else maxLeft = window.innerWidth/2;
+        topVar=node.style.top.substring(0,node.style.top.length-2);
+        leftVar=node.style.left.substring(0,node.style.left.length-2);
+        node.xPos=leftVar/maxLeft;
+        node.yPos=topVar/maxTop;
+*/
+/*
+        var topVar, maxTop = null;
+        var leftVar, maxLeft = null;
+        if( node.style.top.charAt(0)== "-")topVar=node.style.top.substring(1,node.style.top.length-2);
+        else topVar=node.style.top.substring(0,node.style.top.length-2);
+        if( node.style.left.charAt(0)== "-")leftVar=node.style.left.substring(1,node.style.left.length-2);
+        else leftVar=node.style.left.substring(0,node.style.left.length-2);
+        if( node.style.top.charAt(0)== "-") maxTop = "-"+ window.innerHeight/2;
+        else maxTop = window.innerHeight/2;
+        if( node.style.left.charAt(0)== "-") maxLeft = "-"+ window.innerWidth/2;
+        else maxLeft = window.innerWidth/2;
+        topVar=node.style.top.substring(0,node.style.top.length-2);
+        leftVar=node.style.left.substring(0,node.style.left.length-2);
+        //console.log(node.id+" x: "+leftVar+", "+leftVar/maxLeft+" of "+maxLeft);
+        //console.log(node.id+" y: "+topVar+", "+topVar/maxTop+" of "+maxTop);//, max absolute y: "+window.innerHeight/2+", y %: "+topVar/(window.innerHeight/2));
+        //node.style.top = node.style.top.substring(0,node.style.top.length-2)/heightX+"px";
+        //node.style.left = node.style.left.substring(0,node.style.left.length-2)/widthX+"px";
+        node.style.left = maxLeft*(leftVar/maxLeft);
+        node.style.top = maxTop*(topVar/maxTop);
+*/
+        node.style.width = cardWidth+"px";
+        node.style.height = cardHeight+"px";
+      });
+/*
+      dojo.query(".front").forEach(function(node,index,arr){
+          node.style.width = cardWidth+"px";
+          node.style.height = cardHeight+"px";
+        });
+      dojo.query(".back").forEach(function(node,index,arr){
+          node.style.width = cardWidth+"px";
+          node.style.height = cardHeight+"px";
+        });
+*/
+    };
+/*
+    dojo.connect(mnode, "onMoving", function(){
+      domClass.remove(dojo.query(".front",dojo.byId(node.id))[0],"hover");
+    }); // end onMoving
+    dojo.connect(dojo.byId("gameArea"), "onmousemove", function(){
+      //console.log("timer stopped");
+      timer.stop();
+      hoverok = false;
+    }); // end onMoving
+    dojo.connect(mnode, "onMoveStop", function(){
+      console.log("onMoveStop: timer started");
+      timer.start();
+    }); // end onMoveStop
+*/
+  }); // end query for each card
+});
+</script>
+<script>
+function setMinVars(){
+  //cardMinHeight = "100";
+  //cardMinWidth = "69";	
+  //footerMinHeight = cardMinHeight * 1.5;
+  lastHeight = (window.innerHeight/2);
+  lastWidth = (window.innerWidth/2);
+}
+function setCardVars(){
+  //window.setTimeout("cardHeight = window.innerHeight / 5;cardWidth = cardHeight / 1.439628483;",1000);
+  //cardHeight = window.innerHeight / 6.5;cardWidth = cardHeight / 1.439628483;
+  cardHeight = window.innerHeight / 6.5;
+  cardWidth = cardHeight / 1.449275362;
+}
+function setAreaVars(){
+  //footerHeight = window.innerHeight * .15;
+  footerHeight = cardHeight * 1.5;
+  headerHeight = window.innerHeight * .08;
+  playerHeight = (window.innerHeight - headerHeight - footerHeight) / 2;
+  //console.log(playerHeight);
+  var top = window.innerHeight*.5;
+  var left = window.innerWidth*.5;
+  //console.log(top+" / "+left);
+  document.getElementById("header").style.height = headerHeight+"px";
+  document.getElementById("opponentArea").style.height = playerHeight+"px";
+  document.getElementById("playerArea").style.height = playerHeight+"px";
+  document.getElementById("footer").style.height = footerHeight+"px";
+  document.getElementById("footer").style.minHeight = footerMinHeight+"px";
+  /*
+  document.getElementById("playerArea").style.bottom = document.getElementById("footer").clientHeight+"px";
+  document.getElementById("opponentArea").style.bottom = (window.innerHeight-document.getElementById("playerArea").offsetTop)+"px";
+  document.getElementById("header").style.top = top+"px";
+  document.getElementById("header").style.left = left+"px";
+  document.getElementById("opponentArea").style.top = top+"px";
+  document.getElementById("opponentArea").style.left = left+"px";
+  document.getElementById("playerArea").style.top = top+"px";
+  document.getElementById("playerArea").style.left = left+"px";
+*/
+  document.getElementById("footer").style.left = "-"+left+"px";
+  document.getElementById("playerArea").style.left = "-"+left+"px";
+  document.getElementById("opponentArea").style.left = "-"+left+"px";
+  document.getElementById("header").style.left = "-"+left+"px";
+  //document.getElementById("footer").style.top = (top-document.getElementById("footer").clientHeight)+"px";
+  document.getElementById("footer").style.top = (top-document.getElementById("footer").clientHeight)+"px";
+  document.getElementById("playerArea").style.top = "0px";
+  document.getElementById("opponentArea").style.top = "-"+document.getElementById("opponentArea").clientHeight+"px";
+  document.getElementById("header").style.top = "-"+top+"px";
+}
+</script>
+</head>
+<body class="tundra game">
+<div id="gameArea" class="gameArea">
+  <div id="header" class="header">header</div>
+  <div id="opponentArea" class="playerArea opponent tmpOpponentArea">opponent</div>
+  <div id="playerArea" class="playerArea">player</div>
+  <div id="footer" class="footer">footer</div>
+  <!--<div id="dummyCard" class="card" style="position:absolute;top:-999px;left:-999px;visibility:hidden;"></div>-->
+</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+}
+.gameArea {
+  height:50%;
+  width: 50%;
+  min-height: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.header {
+  position: absolute;
+  min-height: 75px;
+  width: 200%;
+}
+.opponent {
+  transform:rotate(180deg);
+  -moz-transform:rotate(180deg);
+}
+.playerArea {
+  position: absolute;
+  top:0px;
+  /*min-height: 400px;*/
+  width: 200%;
+  background-image:url('../images/wallpaper-baratheon-sigil-1600.jpg');
+  /*background-position: center bottom;*/
+  background-position: center center;
+  background-repeat:no-repeat;
+  background-size:100%;
+  z-index: -999;
+}
+.tmpOpponentArea {
+  background-image:url('../images/wallpaper-lannister-sigil-1600.jpg');
+}
+.footer {
+  position: absolute;
+  /*min-height: 150px;*/
+  width: 200%;
+}
+.card {
+  position: absolute;
+  display: inline; /* makes the cards behave like a span for placement purposes; may not be needed if each card is told its specific loc */
+/*
+  width: 162px;
+  height: 233px;
+  max-width: 323px;
+  max-height: 465px;
+  margin: 10px;
+*/
+}
+.front {
+  position: absolute;
+/*  
+  min-width: 69px;
+  min-height: 100px;
+*/
+  /*border: 1px solid #000;*/
+  border-radius: 6px 6px 6px 6px;
+  /*-moz-transition: -moz-transform 1s;*/
+/*
+  margin: auto;
+  -moz-transition: -moz-transform 1s;
+*/
+}
+.expand {
+  -moz-animation: expand 1s;
+  -moz-transform: scale(2);
+/*
+  transform-origin: 0 0 0;
+  -moz-transform-origin: 0 0 0;
+*/
+}
+@-moz-keyframes expand {
+  from { scale(1); }
+  to { scale(2); }
+}
+.back {
+  position: absolute;
+/*
+  min-width: 69px;
+  min-height: 100px;
+*/
+  /*border: 1px solid #000;*/
+  border-radius: 6px 6px 6px 6px;
+}
+
+.behind {
+  z-index:-1;
+  /*visibility: hidden;*/
+}
+
+.toback {
+  -moz-animation: toback 1s; /* Firefox */
+  -moz-transform:rotateY(180deg); /* Firefox */
+  -moz-backface-visibility:hidden; /* Firefox */
+}
+@-moz-keyframes toback /* Firefox */
+{
+from {-moz-transform:rotateY(0deg);}
+to {-moz-transform:rotateY(180deg);}
+}
+
+.tofront {
+  -moz-animation: tofront 1s; /* Firefox */
+  -moz-transform: rotateY(0deg); /* Firefox */
+  -moz-frontface-visibility:hidden; /* Firefox */
+}
+@-moz-keyframes tofront /* Firefox */
+{
+from {-moz-transform:rotateY(180deg);}
+to {-moz-transform:rotateY(0deg);}
+}
