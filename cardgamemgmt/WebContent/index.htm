@@ -58,61 +58,18 @@ require([
     return card;
   }
   // for fun, create some cards
-  // player
   for(var i=0;i<7;i++){
     var rnum = Math.floor((Math.random()*120)+1);
     if(rnum.toString().length == 1) rnum = "00"+rnum;
     if(rnum.toString().length == 2) rnum = "0"+rnum;
     var thisCard = createCard("g0001p0001c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg");
     domConstruct.place(thisCard,"gameArea");
-    //console.log((window.innerHeight/7)*6+cardWidth/2);
-    /*
-    if( thisCard.style.top.charAt(0)== "-") maxY = "-"+ window.innerHeight/2;
-    else maxY = window.innerHeight/2;
-    if( thisCard.style.left.charAt(0)== "-") maxX = "-"+ window.innerWidth/2;
-    else maxX = window.innerWidth/2;
-    */
     var xVar=(window.innerWidth/7*i+cardWidth/2)-window.innerWidth*.5;
     var yVar=(window.innerHeight-cardHeight-10)-window.innerHeight*.5;
     thisCard.style.left=xVar+"px";
     thisCard.style.top=yVar+"px";
-    /*
-    thisCard.xPercent=Math.abs(xVar)/maxX;
-    thisCard.yPercent=Math.abs(yVar)/maxY;
-    */
-    /* TODO */
-    //thisCard.xPercent=(xVar-thisCard.width/2)/maxX;
     thisCard.xPercent=xVar/maxX;
-    //thisCard.yPercent=(yVar-thisCard.height/2)/maxY;
     thisCard.yPercent=yVar/maxY;
-    /*
-    console.log("xVar: "+xVar);
-    console.log("maxX: "+maxX);
-    console.log("xPercent: "+thisCard.xPercent);
-    console.log("yVar: "+yVar);
-    console.log("maxY: "+maxY);
-    console.log("yPercent: "+thisCard.yPercent);
-    console.log(xVar+" / "+yVar+", "+thisCard.xPercent+" / "+thisCard.yPercent);
-    */
-/*
-    if( thisCard.style.top.charAt(0)== "-"){
-      //maxY = "-"+ window.innerHeight/2;
-      thisCard.yPercent="-"+yVar/maxY;
-    }
-    else {
-      //maxY = window.innerHeight/2;
-      thisCard.yPercent=yVar/maxY;
-    }
-    if( thisCard.style.left.charAt(0)== "-"){
-      //maxX = "-"+ window.innerWidth/2;
-      thisCard.xPercent="-"+xVar/maxX;
-    }
-    else {
-      //maxX = window.innerWidth/2;
-      thisCard.xPercent=xVar/maxX;
-    }
-    //console.log(thisCard.xPercent+" / "+thisCard.yPercent);
-*/
   }
   dc = domClass; // variable needed to setting timeout on card flip toggle
   dojo.query(".card").forEach(function(node,index,arr){
@@ -133,37 +90,33 @@ require([
       }
       window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');", 1000);
     }); // end ondblclick
-    dojo.connect(mnode, "onMoving", function(){ /* TODO */
-      //mnode.node.xPercent = xVar/maxX - (mnode.node.width/2);
-      //mnode.node.yPercent = yVar/maxY - (mnode.node.height/2);
-    }); // end onMoving
+    dojo.connect(mnode, "onMoving", function(){ /* TODO */ }); // end onMoving
     dojo.connect(dojo.byId("gameArea"), "onmousemove", function(){ /* TODO */ }); // end onMoving
     dojo.connect(mnode, "onMoveStop", function(){
-      mnode.node.xPercent = xVar/maxX - (mnode.node.width/2);
-      mnode.node.yPercent = yVar/maxY - (mnode.node.height/2);
+      console.log(xVar);
+      //mnode.node.xPercent = ((mnode.node.style.left.substring(0,mnode.node.style.left.length-2) - mnode.node.style.width.substring(0,mnode.node.style.width.length-2))/2) /maxX;
+      //mnode.node.yPercent = ((mnode.node.style.top.substring(0,mnode.node.style.top.length-2) - mnode.node.style.height.substring(0,mnode.node.style.height.length-2))/2) /maxY;
+      mnode.node.xPercent = mnode.node.style.left.substring(0,mnode.node.style.left.length-2) /maxX;
+      mnode.node.yPercent = mnode.node.style.top.substring(0,mnode.node.style.top.length-2) /maxY;
+      //console.log("( "+mnode.node.style.left.substring(0,mnode.node.style.left.length-2)+" / "+maxX+" - "+mnode.node.style.width.substring(0,mnode.node.style.width.length-2)+" ) / 2");
+      //console.log(mnode.node.xPercent);
     }); // end onMoveStop
   }); // end query for each card
   window.onresize = function(){
-    //console.log("test");
-    //findWindowVars();
-    maxX = (window.innerWidth/2);
-    maxY = (window.innerHeight/2);
+    maxX = window.innerWidth/2;
+    maxY = window.innerHeight/2;
     setCardVars();
     setAreaVars();
     dojo.query(".card").forEach(function(node,index,arr){
       node.sizePercent = sizePercent;
-      node.style.left = maxX * node.xPercent+"px";
-      //console.log("x: "+maxX+"*"+node.xPercent+"="+node.style.left);
-      node.style.top = maxY * node.yPercent+"px";
-      //console.log("y: "+maxY+"*"+node.yPercent+"="+node.style.top);
       node.style.width = initCardWidth * node.sizePercent + "px";
       node.style.height = initCardHeight * node.sizePercent + "px";
+      node.style.left = maxX * node.xPercent+"px";
+      node.style.top = maxY * node.yPercent+"px";
     });
     dojo.query(".front,.back").forEach(function(node,index,arr){
-      //console.log(node.parentNode.xPercent+" / "+node.parentNode.yPercent);
       node.style.width = initCardWidth * node.parentNode.sizePercent + "px";
       node.style.height = initCardHeight * node.parentNode.sizePercent + "px";
-      //console.log("x: "+node.style.width+", y: "+node.style.height);
     });
   }; // end onresize
 });

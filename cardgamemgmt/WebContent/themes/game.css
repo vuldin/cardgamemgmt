@@ -20,6 +20,7 @@ body {
 .opponent {
   transform:rotate(180deg);
   -moz-transform:rotate(180deg);
+  -webkit-transform:rotate(180deg);
 }
 .playerArea {
   position: absolute;
@@ -67,14 +68,22 @@ body {
 */
 }
 .expand {
+  animation: expand 1s;
   -moz-animation: expand 1s;
+  -webkit-animation: expand 1s;
+  transform: scale(2);
   -moz-transform: scale(2);
+  -webkit-transform: scale(2);
 /*
   transform-origin: 0 0 0;
   -moz-transform-origin: 0 0 0;
 */
 }
 @-moz-keyframes expand {
+  from { scale(1); }
+  to { scale(2); }
+}
+@-webkit-keyframes expand {
   from { scale(1); }
   to { scale(2); }
 }
@@ -94,23 +103,40 @@ body {
 }
 
 .toback {
-  -moz-animation: toback 1s; /* Firefox */
-  -moz-transform:rotateY(180deg); /* Firefox */
-  -moz-backface-visibility:hidden; /* Firefox */
+  -animation: toback 1s;
+  -moz-animation: toback 1s;
+  -webkit-animation: toback 1s;
+  -transform:rotateY(180deg);
+  -moz-transform:rotateY(180deg);
+  -webkit-transform:rotateY(180deg);
+  -backface-visibility:hidden;
+  -moz-backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
-@-moz-keyframes toback /* Firefox */
-{
+@-moz-keyframes toback {
 from {-moz-transform:rotateY(0deg);}
 to {-moz-transform:rotateY(180deg);}
 }
-
-.tofront {
-  -moz-animation: tofront 1s; /* Firefox */
-  -moz-transform: rotateY(0deg); /* Firefox */
-  -moz-frontface-visibility:hidden; /* Firefox */
+@-webkit-keyframes toback {
+from {-webkit-transform:rotateY(0deg);}
+to {-webkit-transform:rotateY(180deg);}
 }
-@-moz-keyframes tofront /* Firefox */
-{
+.tofront {
+  -animation: tofront 1s;
+  -moz-animation: tofront 1s;
+  -webkit-animation: tofront 1s;
+  -transform: rotateY(0deg);
+  -moz-transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
+  -frontface-visibility:hidden;
+  -moz-frontface-visibility:hidden;
+  -webkit-frontface-visibility:hidden;
+}
+@-moz-keyframes tofront {
 from {-moz-transform:rotateY(180deg);}
 to {-moz-transform:rotateY(0deg);}
+}
+@-webkit-keyframes tofront {
+from {-webkit-transform:rotateY(180deg);}
+to {-webkit-transform:rotateY(0deg);}
 }
