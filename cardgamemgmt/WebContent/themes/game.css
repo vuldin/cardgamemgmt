@@ -4,6 +4,26 @@ html {
 body {
   height: 100%;
 }
+#preloader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin:0;
+  padding:0;
+  background:#aaa;
+  z-index:999;
+}
+#preloaderContent {
+  position: absolute;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
 .gameArea {
   height:50%;
   width: 50%;
@@ -16,6 +36,16 @@ body {
   position: absolute;
   min-height: 75px;
   width: 200%;
+}
+.glow{
+  -box-shadow: 0 0 20px #00B8FF;
+  -moz-box-shadow: 0 0 20px #00B8FF;
+  -webkit-box-shadow: 0 0 20px #00B8FF;
+}
+.moveglow{
+  -box-shadow: 0 0 20px grey;
+  -moz-box-shadow: 0 0 20px grey;
+  -webkit-box-shadow: 0 0 20px grey;
 }
 .opponent {
   transform:rotate(180deg);
@@ -139,4 +169,65 @@ to {-moz-transform:rotateY(0deg);}
 @-webkit-keyframes tofront {
 from {-webkit-transform:rotateY(180deg);}
 to {-webkit-transform:rotateY(0deg);}
+}
+.turned {
+  -animation: turned 1s;
+  -moz-animation: turned 1s;
+  -webkit-animation: turned 1s;
+  -transform:rotate(90deg);
+  -moz-transform:rotate(90deg);
+  -webkit-transform:rotate(90deg);
+}
+@-moz-keyframes turned {
+from {-moz-transform:rotate(0deg);}
+to {-moz-transform:rotate(90deg);}
+}
+@-webkit-keyframes turned {
+from {-webkit-transform:rotate(0deg);}
+to {-webkit-transform:rotate(90deg);}
+}
+.unturned {
+  -animation: unturned 1s;
+  -moz-animation: unturned 1s;
+  -webkit-animation: unturned 1s;
+}
+@-moz-keyframes unturned {
+from {-moz-transform:rotate(90deg);}
+to {-moz-transform:rotate(0deg);}
+}
+@-webkit-keyframes unturned {
+from {-webkit-transform:rotate(90deg);}
+to {-webkit-transform:rotate(0deg);}
+}
+.oppositePerspective {
+  -animation: oppositePerspective 1s;
+  -moz-animation: oppositePerspective 1s;
+  -webkit-animation: oppositePerspective 1s;
+  -transform:rotate(180deg) translate(960px, 365px);
+  -moz-transform:rotate(180deg) translate(960px, 365px);
+  -webkit-transform:rotate(180deg) translate(960px, 365px);
+}
+@-moz-keyframes oppositePerspective {
+from {-moz-transform:rotate(0deg) translate(0px,0px);}
+to {-moz-transform:rotate(180deg) translate(960px, 365px);}
+}
+@-webkit-keyframes oppositePerspective {
+from {-webkit-transform:rotate(0deg) translate(0px, 0px);}
+to {-webkit-transform:rotate(180deg) translate(960px, 365px);}
+}
+.originalPerspective {
+  -animation: originalPerspective 1s;
+  -moz-animation: originalPerspective 1s;
+  -webkit-animation: originalPerspective 1s;
+  -transform:rotate(0deg) translate(0px, 0px);
+  -moz-transform:rotate(0deg) translate(0px, 0px);
+  -webkit-transform:rotate(0deg) translate(0px, 0px);
+}
+@-moz-keyframes originalPerspective {
+from {-moz-transform:rotate(180deg) translate(960px, 365px);}
+to {-moz-transform:rotate(0deg) translate(0px,0px);}
+}
+@-webkit-keyframes originalPerspective {
+from {-webkit-transform:rotate(180deg) translate(960px, 365px);}
+to {-webkit-transform:rotate(0deg) translate(0px, 0px);}
 }
