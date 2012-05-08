@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Player vs Opponent</title>
+<title>testGame: player1 vs player2</title>
 <!--
 <link href="lib/dojo/resources/dojo.css" rel="stylesheet">
 <link href="lib/dijit/themes/tundra/tundra.css" rel="stylesheet">
@@ -15,7 +15,8 @@
 <!-- <script data-dojo-config="async:true" src="lib/dojo/dojo.js"></script> -->
 <script data-dojo-config="parseOnLoad:false,async:true,isDebug:false,locale:'en-us'" src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js"></script>
 <script>
-var dc; // variable needed to setting timeout on card flip toggle
+var dc; // variable needed to set timeout on card flip toggle
+var node;
 var front;
 var back;
 var timer;
@@ -25,6 +26,7 @@ var headerHeight, playerHeight, footerHeight;
 var cardMinHeight, cardMinWidth, footerMinHeight;
 var maxX, maxY;
 var initCardWidth, initCardHeight;
+var consoleWidth, actionsWidth, handWidth, setsWidth;
 // start preloader code
 function showPreloader(domGeom,win,domStyle) {
   //console.log("showPreloader");
@@ -82,8 +84,9 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
     if(rnum.toString().length == 2) rnum = "0"+rnum;
     var thisCard = createCard("g0001p0001c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg");
     domConstruct.place(thisCard,"gameArea");
-    var xVar=(window.innerWidth/7*i+cardWidth/2)-window.innerWidth*.5;
-    var yVar=(window.innerHeight-cardHeight-10)-window.innerHeight*.5;
+    //var xVar=((handWidth/7*i+cardWidth/2)-handWidth*.5)/*+consoleWidth+actionsWidth*/;
+    var xVar=(handWidth/7*i+cardWidth/5)-window.innerWidth/2+consoleWidth;
+    var yVar=(window.innerHeight-cardHeight-cardHeight*.25)-window.innerHeight/2;
     thisCard.style.left=xVar+"px";
     thisCard.style.top=yVar+"px";
     thisCard.xPercent=xVar/maxX;
@@ -110,30 +113,37 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
     var mnode = dojo.dnd.Moveable(node);
     dojo.connect(node,"onmouseover",function(evt){ /* TODO */ });
     dojo.connect(node,"onmouseout",function(){ /* TODO */ });
-    dojo.connect(node,"onclick",function(){ /* TODO onclick event only needs to make the card glow at this point */
-      dojo.forEach(arr,function(entry,i){
-        if(entry.id != node.id) domClass.remove(entry,"glow");
-      });
-      domClass.toggle(node,"glow");
-    });
+    dojo.connect(node,"onclick",function(){ /* TODO */ });
     dojo.connect(node,"ondblclick",function(){
-      flipCard(node);
-      //turnCard(node);
+      //flipCard(node);
+      turnCard(node);
     }); // end ondblclick
     dojo.connect(mnode, "onMoving", function(){
       /* TODO could correct card movement during viewing from oppoonent's perspective, but will become unneeded once switchPerspective() loads current view with opponent's page layout */
-      domClass.toggle(node,"glow");
       domClass.add(node,"moveglow");
     }); // end onMoving
-    dojo.connect(dojo.byId("gameArea"), "onmousemove", function(){ /* TODO */ }); // end onMoving
     dojo.connect(mnode, "onMoveStop", function(){
-    	domClass.remove(node,"moveglow");
-      //mnode.node.xPercent = ((mnode.node.style.left.substring(0,mnode.node.style.left.length-2) - mnode.node.style.width.substring(0,mnode.node.style.width.length-2))/2) /maxX;
-      //mnode.node.yPercent = ((mnode.node.style.top.substring(0,mnode.node.style.top.length-2) - mnode.node.style.height.substring(0,mnode.node.style.height.length-2))/2) /maxY;
-      mnode.node.xPercent = mnode.node.style.left.substring(0,mnode.node.style.left.length-2) /maxX;
-      mnode.node.yPercent = mnode.node.style.top.substring(0,mnode.node.style.top.length-2) /maxY;
+      dojo.query(".glow").forEach(function(glownode,index,arr){
+        if(glownode.id != node.id) domClass.remove(glownode,"glow");
+        else domClass.toggle(glownode,"glow");
+      });
+      domClass.toggle(node,"glow");
+      domClass.remove(node,"moveglow");
+      mnode.node.xPercent = mnode.node.style.left.substring(0,mnode.node.style.left.length-2)/maxX;
+      mnode.node.yPercent = mnode.node.style.top.substring(0,mnode.node.style.top.length-2)/maxY;
     }); // end onMoveStop
   }); // end query for each card
+  dojo.connect(node,"onclick",function(){ /* TODO */ });
+  dojo.connect(document, "onmousemove", function(){ /* TODO */ }); // end onMoving
+  dojo.connect(document, "onkeypress", function(e) {
+	    var key = e.keyCode || e.charCode;
+	    if (key == dojo.keys.ESCAPE) {
+	      //return false;
+	      dojo.query(".glow").forEach(function(node,index,arr){
+	        domClass.remove(node,"glow");
+	      });
+	    }
+	  });
   window.onresize = function(){
     maxX = window.innerWidth/2;
     maxY = window.innerHeight/2;
@@ -155,16 +165,6 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
 }); // end main
 </script>
 <script>
-/*
-function findWindowVars(){
-  // called at initial load and every resize to find max X/Y values
-  //cardMinHeight = "100";
-  //cardMinWidth = "69";	
-  //footerMinHeight = cardMinHeight * 1.5;
-  maxX = (window.innerWidth/2);
-  maxY = (window.innerHeight/2);
-}
-*/
 function setCardVars(){
   /* called at initial load and every resize */
   /* TODO set to size of current regular images (not plot cards) */
@@ -198,10 +198,27 @@ function setAreaVars(){
   document.getElementById("header").style.height = headerHeight+"px";
   document.getElementById("header").style.left = "-"+maxX+"px";
   document.getElementById("header").style.top = "-"+maxY+"px";
+  consoleWidth = window.innerWidth*.2;
+  actionsWidth = window.innerWidth*.1;
+  setsWidth = window.innerWidth*.06;
+  handWidth = window.innerWidth-consoleWidth-actionsWidth-setsWidth;
+  document.getElementById("consoleSpan").style.width = consoleWidth+"px";
+  document.getElementById("consoleSpan").style.height = footerHeight+"px";
+  document.getElementById("handSpan").style.width = handWidth+"px";
+  document.getElementById("handSpan").style.height = footerHeight+"px";
+  document.getElementById("handSpan").style.left = consoleWidth+"px";
+  document.getElementById("actionsSpan").style.width = actionsWidth+"px";
+  document.getElementById("actionsSpan").style.height = footerHeight+"px";
+  document.getElementById("actionsSpan").style.right = setsWidth+"px";
+  document.getElementById("setsSpan").style.width = setsWidth+"px";
+  document.getElementById("setsSpan").style.height = footerHeight+"px";
+  document.getElementById("setsSpan").style.right = "0px";
 }
 function flipCard( node ){
+  thisNode = node;
   front = node.firstElementChild;
   back = node.lastElementChild;
+  dc.remove(node,"glow");
   if( front.className.indexOf("behind") == -1 ) {
     dc.toggle(front,"toback");
     dc.toggle(back,"tofront");
@@ -209,21 +226,17 @@ function flipCard( node ){
     dc.toggle(front,"tofront");
     dc.toggle(back,"toback");
   }
-  window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');", 1000);
+  window.setTimeout("dc.toggle(front,'behind');dc.toggle(back,'behind');dc.remove(front,'tofront toback');dc.remove(back,'tofront toback');dc.add(thisNode,'glow');", 1000);
 }
 function turnCard( node ){
-  front = node.firstElementChild;
-  back = node.lastElementChild;
-  if( front.className.indexOf("turned") == -1 ) {
-    dc.toggle(front,"turned");
-    dc.toggle(back,"turned");
+  thisNode = node;
+  if( node.className.indexOf("turned") == -1 ) {
+	dc.toggle(node,"turned");
   } else {
-    dc.toggle(front,"turned");
-    dc.toggle(back,"turned");
-    dc.toggle(front,"unturned");
-    dc.toggle(back,"unturned");
+	dc.toggle(node,'turned');
+	dc.toggle(node,'unturned');
   }
-  window.setTimeout("dc.remove(front,'unturned');dc.remove(back,'unturned');", 1000);
+  window.setTimeout("dc.remove(thisNode,'unturned');dc.add(thisNode,'glow');", 1000);
 }
 function switchPerspective(){
   /* TODO dynamically set translate(x,y) */
@@ -247,10 +260,41 @@ function switchPerspective(){
   </div>
 </div>
 <div id="gameArea" class="gameArea">
-  <div id="header" class="header">CGM : Game Of Thrones : Player vs Opponent<br>Round 1 : Setup phase : Player turn</div>
-  <div id="opponentArea" class="playerArea opponent tmpOpponentArea">Opponent</div>
-  <div id="playerArea" class="playerArea">Player</div>
-  <div id="footer" class="footer">footer</div>
+  <div id="header" class="header">CGM : Game Of Thrones : testGame : player1 vs player2<br>round: 1 - phase: marshalling - turn: player1</div>
+  <div id="opponentArea" class="playerArea opponent tmpOpponentArea">player2</div>
+  <div id="playerArea" class="playerArea">player1</div>
+  <div id="footer" class="footer">
+    <span id="consoleSpan" style="overflow-y:scroll;">
+      <span style="display:block;margin: 0px 2px;">testGame : player1 vs player2</span>
+      <span style="display:block;margin: 0px 2px;">round: 1 - phase: marshalling - turn: player1</span>
+      <span style="display:block;margin: 0px 2px;color:white;">player1 draws 7 cards</span>
+    </span>
+    <span id="handSpan">
+      <span style="margin: 5px 5px;">hand (7)</span>
+    </span>
+    <span id="actionsSpan" style="overflow-y:scroll;">
+      <span id="selectionActions" style="display:block;">
+        <span style="display:block;background:grey;color:white;">selection actions</span>
+        <span style="display:block;margin: 5px 5px;">expand</span>
+        <span style="display:block;margin: 5px 5px;">play</span>
+        <span style="display:block;margin: 5px 5px;">turn</span>
+        <span style="display:block;margin: 5px 5px;">flip</span>
+        <span style="display:block;margin: 5px 5px;">discard</span>
+        <span style="display:block;margin: 5px 5px;">kill</span>
+      </span>
+      <span id="generalActions" style="display:block;">
+        <span style="display:block;background:grey;color:white;">general actions</span>
+        <span style="display:block;margin: 5px 5px;">draw cards</span>
+        <span style="display:block;margin: 5px 5px;">switch perspective</span>
+      </span>
+    </span>
+    <span id="setsSpan" style="text-align:center;">
+      <span style="display:block;margin: 4% 4%;height:20%;border: 1px solid #3C3B37;border-radius: 3px;-webkit-border-radius: 3px;background:grey;color:white;">deck (46)</span>
+      <span style="display:block;margin: 4% 4%;height:20%;border: 1px solid #3C3B37;border-radius: 3px;-webkit-border-radius: 3px;background:grey;color:white;">dead (0)</span>
+      <span style="display:block;margin: 4% 4%;height:20%;border: 1px solid #3C3B37;border-radius: 3px;-webkit-border-radius: 3px;background:grey;color:white;">discard (0)</span>
+      <span style="display:block;margin: 4% 4%;height:20%;border: 1px solid #3C3B37;border-radius: 3px;-webkit-border-radius: 3px;background:grey;color:white;">plot (7)</span>
+    </span>
+  </div>
 </div>
 </body>
 </html>

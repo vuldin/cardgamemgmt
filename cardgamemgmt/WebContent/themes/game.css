@@ -21,8 +21,23 @@ body {
   color: #fff;
   padding: 25px;
   border-radius: 15px;
-  -moz-border-radius: 15px;
+  /*-moz-border-radius: 15px;*/
   -webkit-border-radius: 15px;
+}
+#consoleSpan {
+  position: absolute;
+  background: #3C3B37;
+  color: #BCB3A5;
+}
+#actionsSpan {
+  position: absolute;
+  vertical-align: middle;
+}
+#handSpan {
+  position: absolute;
+}
+#setsSpan {
+  position: absolute;
 }
 .gameArea {
   height:50%;
@@ -36,16 +51,17 @@ body {
   position: absolute;
   min-height: 75px;
   width: 200%;
+  z-index: -999;
 }
 .glow{
-  -box-shadow: 0 0 20px #00B8FF;
-  -moz-box-shadow: 0 0 20px #00B8FF;
+  box-shadow: 0 0 20px #00B8FF;
+  /*-moz-box-shadow: 0 0 20px #00B8FF;*/
   -webkit-box-shadow: 0 0 20px #00B8FF;
 }
 .moveglow{
-  -box-shadow: 0 0 20px grey;
-  -moz-box-shadow: 0 0 20px grey;
-  -webkit-box-shadow: 0 0 20px grey;
+  box-shadow: 10px 10px 10px black;
+  /*-moz-box-shadow: 10px 10px 10px black;*/
+  -webkit-box-shadow: 10px 10px 10px black;
 }
 .opponent {
   transform:rotate(180deg);
@@ -144,8 +160,8 @@ body {
   -webkit-backface-visibility:hidden;
 }
 @-moz-keyframes toback {
-from {-moz-transform:rotateY(0deg);}
-to {-moz-transform:rotateY(180deg);}
+  from {-moz-transform:rotateY(0deg);}
+  to {-moz-transform:rotateY(180deg);}
 }
 @-webkit-keyframes toback {
 from {-webkit-transform:rotateY(0deg);}
