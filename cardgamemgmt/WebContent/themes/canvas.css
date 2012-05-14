@@ -18,9 +18,21 @@ body,html {
 }
 */
 body,html {
+	height:100%;
   margin: 0;
 }
 #container {
+	height:100%;
+	width:100%;
+  overflow: auto;
+}
+/* below declaration ensures kinetic's generated div fits correctly on the page */
+#container div {
+	display:block !important;
+}
+#container canvas {
+  vertical-align: top;
+  display: block;
   overflow: auto;
 }
 .glow {

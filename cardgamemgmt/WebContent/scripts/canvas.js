@@ -1,29 +1,62 @@
 var stage;
-var layer;
+var canvasCtx;
+var card;
+var cardFrontLayer;
 var player;
 var session;
 var deck;
-var scaleTimeout;
+var hand;
+var selectTimeout;
+var prevWinWidth;
+var prevWinHeight;
+var previousSelected;
+var cardWidthRatio=.06;
+var cardHeightRatio=.18;
+var selectGroup=new Kinetic.Group({
+  /* TODO allow dragging of selectGroup via toggle */
+  draggable: false
+});
+var cardWidth=null;
+var cardHeight=null;
+var apple=navigator.userAgent.match(/(iPhone)|(iPod)/); // is iPhone
+var found;
+var resizeTimeout=null;
+var orientationTimeout=null;
 /* TODO remove color and colorNum variables */
-var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey", "white", "black"];
-function selectCard(shape){
-  /* TODO add glowing border image */
-  /* TODO
-   * add card to new selectGroup collection
-  */
-  shape.getAttrs().selected=true;
-  console.log('selected '+shape.getAttrs().id);
+var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey"];
+var colorNum;
+var debug=true;
+function log(origin,msg){
+  if(debug)console.log(origin+': '+msg);
+}
+/* possibly add event handlers for dragging/interacting with group */
+/* TODO add/remove select shadow to card */
+/* TODO add/remove selectGroup shadow to card */
+/* TODO find out how group movement behaves if restrictions are placed on one card in the group */
+/*
+function selectCard(card){
+  if(card.getAttrs().selected==false){
+    selectTimeout = setTimeout(function(){
+      card.getAttrs().selected=true;
+      //selectGroup.add(card);
+    },100);
+  }
 };
-function deselectCard(shape){
-  /* TODO remove glowing border image */
-  shape.getAttrs().selected=false;
-  console.log('deselected '+shape.getAttrs().id);
+function deselectCard(card){
+  if(card.getAttrs().selected==true){
+    selectTimeout = setTimeout(function(){
+      card.getAttrs().selected=false;
+      selectGroup.remove(card);
+      //console.log('deselected '+card.getAttrs().id);
+    },100);
+  }
 };
+*/
 /*
 function scaleCard(shape){
   // TODO create and use a scaled value inside the card JSON for this function (in place of selected)
-  // not already selected
   if(shape.getAttrs().selected==false){
+    // not already selected
     // deselect any other selected card
     for(var i=0;i<layer.children.length;i++) {
       if(layer.children[i].getAttrs().selected==true) {
@@ -75,69 +108,83 @@ function scaleCard(shape){
   }
 };
 */
-function turnCard(shape){
-  /* TODO split into turnCard and unturnCard (handle which gets called in dblclick function */
-  shape.getAttrs().ready=false;
-  console.log('turning');
-  clearTimeout(scaleTimeout);
-  if(shape.getAttrs().turned==false){
-    console.log(shape.getAttrs().turned);
-    shape.transitionTo({
+/* TODO is card.ready boolean needed? */
+/*
+function turnCard(card){
+  if(card.getAttrs().turned==false){
+    //clearTimeout(selectTimeout);
+    //card.getAttrs().ready=false;
+    card.transitionTo({
       //rotationDeg: 45,
       rotation: Math.PI/2,
       duration: .5,
       easing: 'strong-ease-out',
       callback: function(){
-        shape.setAttrs(shape.getAttrs().turned=true);
-        shape.getAttrs().ready=true;
-        console.log('turned');
+        card.setAttrs(card.getAttrs().turned=true);
+        //card.getAttrs().ready=true;
+        //console.log('turned');
       }
-    });
-  } else {
-    console.log(shape.getAttrs().turned);
-    shape.transitionTo({
+    }); // end transitionTo
+  } // end if
+};
+function unturnCard(card){
+  if(card.getAttrs().turned==true){
+    //clearTimeout(selectTimeout);
+    //card.getAttrs().ready=false;
+    card.transitionTo({
       //rotationDeg: 0,
       rotation: 0,
       duration: .5,
       easing: 'strong-ease-out',
       callback: function(){
-        shape.setAttrs(shape.getAttrs().turned=false);
-        shape.getAttrs().ready=true;
-        console.log('turned back');
+        card.setAttrs(card.getAttrs().turned=false);
+        //card.getAttrs().ready=true;
+        //console.log('unturned');
       }
-    });
-  }
+    }); // end transitionTo
+  } // end if
 };
+*/
+/*
+function removeCard(card){
+  cardFrontLayer.remove(card);
+  cardFrontLayer.draw();
+}
+*/
 // createCard will only be called when a card needs to be displayed on screen
 function createCard(cardJSON){
   var card = new Kinetic.Rect(cardJSON);
-  /* TODO 
-   * dynamically add below functions as needed?
-   * these functions would need to be moved out of createCard
-  */
-  card.on('click', function(evt) {
-    //scaleCard(evt.shape);
-    if(!evt.shape.getAttrs().selected){
-      selectCard(evt.shape);
-      card.moveToTop();
-      layer.draw();
+  /* TODO dynamically add listener functions to each card as needed
+   * these functions would need to be moved out of createCard */
+  /* TODO add text to cards */
+  //console.log(card);
+  //card.setText(card.name,card.width/2,card.height/2);
+  //cardFrontLayer.getContext().fillText(cardJSON.name,cardJSON.x,(cardJSON.y-20));
+  card.on('click', function() {});
+  card.on("dblclick dbltap", function(){
+    if(!card.getAttrs().turned){
+      card.transitionTo({
+        rotation: Math.PI/2,
+        duration: .5,
+        easing: 'strong-ease-out',
+        callback: function(){
+          card.setAttrs(card.getAttrs().turned=true);
+        }
+      });
     }
-    else deselectCard(evt.shape);
+    else {
+      card.transitionTo({
+        rotation: 0,
+        duration: .5,
+        easing: 'strong-ease-out',
+        callback: function(){
+          card.setAttrs(card.getAttrs().turned=false);
+        }
+      });
+    }
   });
-  card.on("dblclick dbltap", function(evt){
-    /* TODO configure setTimeout/clearTimeout so click and dblclick/dbltap events work */
-    /*
-    layer.remove(card);
-    layer.draw();
-    */
-    card.moveToTop();
-    selectCard(evt.shape);
-    turnCard(evt.shape);
-  });
-  card.on("dragstart", function(evt){
-    card.moveToTop();
-    selectCard(evt.shape);
-    layer.draw();
+  card.on("dragstart", function(){
+    cardFrontLayer.draw();
   });
   card.on("dragmove", function(){
     document.body.style.cursor = "pointer";
@@ -149,74 +196,262 @@ function createCard(cardJSON){
   card.on("mouseout", function(){
     document.body.style.cursor = "default";
   });
-  layer.add(card);
+  card.on('mousedown touchstart',function(){
+    /* TODO deselect card after 1 second */
+    log('card mousedown','mousedown on '+card.getAttrs().id);
+    if(!card.getAttrs().selected){
+      //selectCard(card);
+      //if(typeof previousSelected!='undefined'&&card!=previousSelected){
+      if(typeof previousSelected!='undefined'){
+        log('card mousedown','deselecting '+previousSelected.getAttrs().id);
+        //deselectCard(previousSelected);
+        previousSelected.getAttrs().selected=false;
+      }
+      log('card mousedown','selecting '+card.getAttrs().id);
+      card.getAttrs().selected=true;
+      log('card mousedown','setting previousSelected to '+card.getAttrs().id);
+      previousSelected=card;
+      found=false;
+      for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
+        log('card mousedown',card.getAttrs().id+' is found in selectGroup');
+        found=true;
+      }
+      if(!found){
+        log('card mousedown','adding '+card.getAttrs().id+' to selectGroup');
+        selectGroup.add(card);
+      }
+      log('card mousedown','selectGroup size: '+selectGroup.children.length);
+      log('card mousedown','moving '+card.getAttrs().id+' to top of layer');
+      card.moveToTop();
+      cardFrontLayer.draw();
+    }
+  });
+  card.on('mouseup touchend',function(){});
+  cardFrontLayer.add(card);
+  return card;
 }; // end createCard function
+function resizeCanvas(){
+  var arr=null;
+  /* TODO test the correct functions work on apple devices */
+  //rc++;
+  if(apple){
+    //$("#container div").height($(window).height() + 60);
+    arr=document.getElementsByTagName('div');
+    for(var i=1;i<arr.length;i++){
+      arr[i].style.height=(window.innerHeight+60)+'px';
+    }
+    //$("canvas").height($(window).height() + 60);
+    arr=document.getElementsByTagName('canvas');
+    for(var i=1;i<arr.length;i++){
+      arr[i].height=(window.innerHeight+60);
+    }
+  }
+  arr=document.getElementsByTagName('div');
+  //console.log('div: '+arr.length);
+  for(var i=1;i<arr.length;i++){
+    //console.log('current div iteration: '+i);
+    document.getElementsByTagName('div')[i].style.width=window.innerWidth+'px';
+    document.getElementsByTagName('div')[i].style.height=window.innerHeight+'px';
+  }
+  arr=document.getElementsByTagName('canvas');
+  log('resizeCanvas','canvas: '+arr.length);
+  for(var i=0;i<arr.length;i++){
+    log('resizeCanvas','current canvas iteration: '+i);
+    //console.log('setting width/height to '+window.innerWidth+'/'+window.innerHeight);
+    arr[i].width=window.innerWidth;
+    arr[i].height=window.innerHeight;
+    if(i<2){
+      log('resizeCanvas','set canvas to black');
+      canvasCtx=arr[i].getContext('2d');
+      canvasCtx.fillStyle = 'black';
+      canvasCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+  }
+  log('resizeCanvas','resizing stage');
+  stage.attrs.width=window.innerWidth;
+  stage.attrs.height=window.innerHeight;
+  //console.log('now should be '+window.innerWidth+'/'+window.innerHeight+': '+document.getElementsByTagName('div')[1].style.width+'/'+document.getElementsByTagName('div')[1].style.height);
+  log('resizeCanvas','now should be '+window.innerWidth+'/'+window.innerHeight+':');
+  log('resizeCanvas',document.getElementsByTagName('div')[1]);
+  if(document.getElementsByTagName('canvas')[2])log(document.getElementsByTagName('canvas')[2]);
+  // hide webkit url bar
+  if(apple){
+    setTimeout(function(){
+      window.scrollTo(0,1);
+    }, 100);   
+  }
+  /*
+  ctx.fillStyle = 'green';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = 'black';
+  ctx.fillRect(10, 10, width - 20, height - 20);
+  ctx.fillStyle = 'black';
+  ctx.textAlign = 'center';
+  ctx.fillText('Orientiation changes: '+oc, width/2, height/2);
+  ctx.fillText('Resize events: '+rc, width/2, height/2+10);
+  */
+  //cardFrontLayer.draw();
+} // end resizeCanvas
+function scaleObjects(){
+  // resizeCanvas before scaleObjects
+  /* TODO test scaling shapes instead of the stage */
+  //if(window.innerWidth<window.innerHeight) stage.setScale(window.innerWidth/1920,window.innerWidth/1920);
+  //else stage.setScale(window.innerHeight/1200,window.innerHeight/1200);
+  log('scaleObjects','innerWidth: '+window.innerWidth);
+  log('scaleObjects','innerHeight: '+window.innerHeight);
+  stage.setScale(window.innerHeight/1200,window.innerHeight/1200);
+  //stage.setScale(prevWinHeight/window.innerHeight,prevWinHeight/window.innerHeight);
+  /*
+  for(var i=0;i<stage.getChildren();i++){
+    stage.getChildren()[i].setScale(window.innerWidth/1920,window.innerHeight/1200);
+  }
+  */
+} // end scaleObjects()
+function resizeCards(cardArr){
+  /* TODO update cardHeight/cardWidth multipliers based on actual ratios */
+  /* TODO use size of layer instead of window (always call scaleObjects prior to resizeCards) */
+  if(window.innerWidth<window.innerHeight){
+  //if(cardFrontLayer.getCanvas().width<cardFrontLayer.getCanvas().height){
+    cardWidth = window.innerWidth*cardWidthRatio;
+    cardHeight = cardWidth*1.428571429;
+  } else {
+    cardHeight = window.innerHeight*cardHeightRatio;
+    cardWidth = cardHeight*.7;
+  }
+  /* TODO will likely need to allow for multiple visible layers (currently hardcoded to first layer) */
+  log('resizeCards','using previous window width/height ('+prevWinWidth+'/'+prevWinHeight+')');
+  for(var i=0;i<cardArr.length;i++){
+    var child=cardArr[i];
+    var xRatio=child.getX()/prevWinWidth;
+    var yRatio=child.getY()/prevWinHeight;
+    child.setX(Math.round(window.innerWidth*xRatio));
+    child.setY(Math.round(window.innerHeight*yRatio));
+    child.attrs.width=cardWidth;
+    child.attrs.height=cardHeight;
+  }
+} // end resizeCards
+function orientationChange(){
+  //oc++;
+}
+function setPrevWinSizes(){
+  /* TODO fix prevWinWidth/Height */
+  log('setPrevWinSizes','saving window width/height ('+window.innerWidth+'/'+window.innerHeight+')');
+  prevWinWidth=window.innerWidth;
+  prevWinHeight=window.innerHeight;
+}
+
+// begin window functions
 window.onload = function(){
   stage = new Kinetic.Stage({
     container: "container",
+    /*
     width: window.innerWidth,
     height: window.innerHeight
+    */
+    width: 1920,
+    height: 1200
   });
-  layer = new Kinetic.Layer();
+  cardFrontLayer = new Kinetic.Layer();
   /* TODO populate player and session variables with values from server */
-  /* TODO player may be contained within session variable on server side */
   player = { id: 'PLAYERID' };
-  session = { id: 'SESSIONID' };
-  deck = {
+  opponent = { id: 'OPPONENTID' };
+  session = {
+    id:'SESSIONID',
+    players:[player,opponent],
+    admins:[]
+  };
+  /* TODO should deck be the same type of collection as other card collections (Kinetic group)?
+   * deck doesn't need to be a kinetic group since it rarely (if ever) will need to be fully represented on the page
+   * there may be benefits to having all card collections behave in the same way (regardless of if they appear fully on the page */
+  deck = new Kinetic.Group({
+    draggable: false,
     id: 'DECKID',
     name: 'deck1',
-    player: player.id,
+    //player: player.id,
+    owner: player.id,
     session: session.id,
-    cards: []
-  };
-  for(var i=0;i<200;i++){
-    var colorNum = Math.floor(Math.random()*9);
-    /* TODO dynamically set cardWidth and cardHeight */
+    cards:[] /* TODO the deck object should only provide card information via server request */
+  });
+  hand = new Kinetic.Group({
+    draggable:false,
+    id:'HANDID',
+    name:'hand1',
+    owner:player.id,
+    session:session.id
+  });
+  /* TODO resizeCanvas tries to resize 3rd canvas before it exists */
+  resizeCanvas();
+  //scaleObjects();
+  //resizeCards(cardFrontLayer.getChildren());
+  cardWidth = window.innerWidth*cardWidthRatio;
+  cardHeight = cardWidth*1.428571429;
+  var extra = 10;
+  var minx=cardWidth/2+extra;
+  var maxx=window.innerWidth-minx-extra;
+  var miny=cardHeight/2+extra;
+  var maxy=window.innerHeight-miny-extra;
+  /* TODO remove card generating for loop
+   * instead do the following steps:
+   * 1. generate deck info (including json for each card)
+   * 2. server will be responsible for shuffling deck and keeping track of card order/location
+   * 3. createCard(server.drawCards(7)); */
+  var cardAmount=7;
+  for(var i=0;i<cardAmount;i++){
+    colorNum=Math.floor(Math.random()*7);
     /* TODO set dragConstraints/dragBounds when in hand/inPlay areas */
-    cardWidth = 70;
-    cardHeight = 100;
     // create JSON representation of the cards that will be loaded with as much info as possible filled in
-    var cardJSON = {
+    var cardJSON={
       id: (i+1),
-      name: 'card'+(i+1),
+      name: 'card'+(i+1), /* TODO this may need to be modified in order to best use the group.get() function */
       player: player.id,
       session: session.id,
       deck: deck.id,
-      inPlay: true,
-      selected: false,
+      inPlay: true, // is this represented on the screen?
+      selected: false, // is this the most recent one selected
       turned: false,
       flipped: false,
       ready: true, // is able to be interacted with (i.e. not in the middle of an animation)
-      x:(Math.floor(Math.random()*(window.innerWidth-cardWidth))+cardWidth/2),
-      y:(Math.floor(Math.random()*(window.innerHeight-cardHeight))+cardHeight/2),
+      x:(minx+Math.round(Math.random()*(maxx-minx))),
+      y:(miny+Math.round(Math.random()*(maxy-miny))),
+      /*
+      x:(window.innerWidth-((cardWidth+cardWidth*.2)*(cardAmount-1)))/2+(cardWidth+cardWidth*.2)*i,
+      y:window.innerHeight-(window.innerHeight*.01+cardHeight/2),
+      */
       fill: colors[colorNum],
       stroke: "black",
-      strokeWidth: 4,
+      strokeWidth: 1,
       centerOffset: {
         x: cardWidth / 2,
         y: cardHeight / 2
       },
       draggable: true,
-      /* TODO make card size dynamic accoding to window size */
       width: cardWidth,
       height: cardHeight,
       cornerRadius: 5
     };
+    //console.log('( (windowWidth - handWidth) / 2 ) + cardWidth * i');
+    //console.log((window.innerWidth-((cardWidth+cardWidth*.2)*(cardAmount-1)))/2+(cardWidth+cardWidth*.2)*i);
     // send the JSON variable to the server as argument to the remote createCard (?) function
     //cardJSON = server.createCard(cardJSON); // server will return the JSON variable with remaining values filled in
-    // add card to player's deck
-    deck.cards.push(cardJSON);
-    // create card object on the canvas
-    createCard(cardJSON);
-  }
-  /*
-  layer.on('click', function(evt) {
-    //var scaleTimeout = null;
-    //clearTimeout(scaleTimeout);
-    //scaleTimeout = setTimeout(scaleCard(evt.shape),1000);
-    scaleCard(evt.shape);
-  });
-  */
+    /* all cards should start included in the associated player's deck
+     * cards will move between the library/hand/discard/dead/etc groups throughout the game */
+    deck.attrs.cards.push(cardJSON);
+    log("onload","creating "+cardJSON.name+" and adding to "+player.id+"'s hand");
+    //hand.add(createCard(cardJSON));
+    hand.add(createCard(cardJSON));
+  } // end card for loop
+  /* TODO see if there is a tap event to add to this listener */
+  cardFrontLayer.on('click', function(evt) {
+    /* TODO layer's click handler isn't called when the click occurs outside of the layer's shapes */
+    log('cardFrontLayer click','start');
+    if(!evt.shape){
+      for(var i=0;i<selectGroup.getChildren().length;i++){
+        /* TODO remove shadows from cards */
+      }
+      log('cardFrontLayer click','removing selected cards');
+      selectGroup.removeChildren();
+    }
+  },false);
   /*
   layer.on('click', function(evt) {
     // select shapes by name
@@ -234,53 +469,71 @@ window.onload = function(){
     }
   }, false);
   */
-  stage.add(layer);
-};
+  cardFrontLayer.add(hand);
+  cardFrontLayer.add(selectGroup);
+  stage.add(cardFrontLayer);
+  //sizing();
+  setPrevWinSizes();
+}; // end onload function
 /*
-var canvas = document.getElementsByTagName('CANVAS')[2];
-var ctx = canvas.getContext("2d");
-var rc = 0; // resize counter
-var oc = 0; // orientiation counter 
-var ios = navigator.userAgent.match(/(iPhone)|(iPod)/); // is iPhone
-function resizeCanvas() {
-  //inc resize counter
-  rc++;
-  if(ios) {
-    //increase height to get rid off ios address bar
-    document.getElementById('container').height($(window).height() + 60);
+document.onkeyup(function(evt){
+  if (evt.keyCode==27){
+    // TODO clear selection when hitting escape
   }
-  var width = document.getElementById('container').width;
-  var height = document.getElementById('container').height;
-  cheight = height - 20; // subtract the fix height
-  cwidth = width;
-  //set canvas width and height
-  document.getElementsByTagName('CANVAS')[2].style.width=cwidth;
-  document.getElementsByTagName('CANVAS')[2].style.height=cheight;
-  //hides the WebKit url bar
-  if(ios) {
-    setTimeout(function() {
-      window.scrollTo(0, 1);
-    }, 100);
-  }
-  ctx.fillStyle = 'green';
-  ctx.fillRect(0, 0, cwidth, cheight);
-  ctx.fillStyle = 'black';
-  ctx.fillRect(10, 10, cwidth - 20, cheight - 20);
-  //write number of orientation changes and resize events
-  ctx.fillStyle = 'white';
-  ctx.textAlign = 'center';
-  ctx.fillText('Orientiation changes: '+oc, cwidth/2, cheight/2);
-  ctx.fillText('Resize events: '+rc, cwidth/2, cheight/2 + 10);
-};
-
-var resizeTimeout;
-window.onresize = function() {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(resizeCanvas, 100);
-};
-var otimeout;
-window.onorientationchange = function() {
-  clearTimeout(otimeout);
-  otimeout = setTimeout(orientationChange, 50);
-};
+});
 */
+window.onresize=function(){
+  clearTimeout(resizeTimeout);
+  /* TODO add resizeCards */
+  resizeTimeout=setTimeout(function(){
+    log('onresize','resizing...');
+    //alert('resizeCanvas');
+    resizeCanvas();
+    //alert('scaleObjects');
+    scaleObjects();
+    //alert('resizeCards');
+    //resizeCards(cardFrontLayer.getChildren());
+    //alert('setPrevWinSizes');
+    setPrevWinSizes();
+    //alert('draw card layer');
+    cardFrontLayer.draw();
+  }, 100);
+};
+window.onorientationchange=function(){
+  /* TODO test clearing resizeTimeout and calling onresize */
+  clearTimeout(orientationTimeout);
+  clearTimeout(resizeTimeout);
+  orientationTimeout=setTimeout(function(){
+    log('onorientationchange','orienting...');
+    orientationChange();
+    alert('resizeCanvas');
+    resizeCanvas();
+    alert('scaleObjects');
+    scaleObjects();
+    //alert('resizeCards');
+    //resizeCards(cardFrontLayer.getChildren());
+    alert('setPrevWinSizes');
+    setPrevWinSizes();
+    alert('draw card layer');
+    cardFrontLayer.draw();
+  },50);
+};  
+function sizing(){
+  /* TODO sizing tasks:
+   * during resize, scale the needed layers and resize stage, canvas, div and any other needed elements
+   * size of canvas should probably be scaled down from 1920:1200 */
+  // cardFrontLayer.setScale(.5,.5);cardFrontLayer.setX(stage.getWidth()/2);cardFrontLayer.setY(stage.getHeight()/2);cardFrontLayer.draw();
+  //document.getElementsByTagName('canvas')[2].setAttribute("id","canvas");
+  //document.getElementsByTagName('div')[1].style.width='';
+  //document.getElementsByTagName('div')[1].style.height='';
+  //console.log(document.getElementsByTagName('div')[1]);
+  //var canvas = document.getElementById("canvas");
+  //var ctx = document.getElementsByTagName('canvas')[2].getContext('2d');
+  //console.log(ctx);
+  //var rc = 0;  // resize counter
+  //var oc = 0;  // orientiation counter
+
+}; // end sizing
+// run sizing once DOM is ready
+//if (document.addEventListener) document.addEventListener("DOMContentLoaded", sizing, false);
+//if (document.addEventListener) document.addEventListener("DOMContentLoaded", new function(){console.log('dom ready');}, false);
