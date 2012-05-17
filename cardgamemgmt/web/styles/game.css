@@ -73,7 +73,7 @@ body {
   top:0px;
   /*min-height: 400px;*/
   width: 200%;
-  background-image:url('../images/wallpaper-baratheon-sigil-1600.jpg');
+  background-image:url('../images/agot/wallpaper-baratheon-sigil-1600.jpg');
   /*background-position: center bottom;*/
   background-position: center center;
   background-repeat:no-repeat;
@@ -81,7 +81,7 @@ body {
   z-index: -999;
 }
 .tmpOpponentArea {
-  background-image:url('../images/wallpaper-lannister-sigil-1600.jpg');
+  background-image:url('../images/agot/wallpaper-lannister-sigil-1600.jpg');
 }
 .footer {
   position: absolute;

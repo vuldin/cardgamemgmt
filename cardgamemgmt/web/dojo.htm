@@ -24,6 +24,7 @@
  */
  -->
 <head>
+<meta charset="UTF-8">
 <title>testGame: player1 vs player2</title>
 <!--
 <link href="lib/dojo/resources/dojo.css" rel="stylesheet">
@@ -93,8 +94,9 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
     });
     domClass.add(front,"front");
     domConstruct.place(front,card);
+    console.log(location.host+'/cgm/images/agot/back.jpg');
     var back = domConstruct.create("div",{
-      style:"height:"+cardHeight+"px;width:"+cardWidth+"px;background-image:url('"+location.href+"images/back.jpg');background-position:center center;background-repeat:no-repeat;background-size:100%;",
+      style:"height:"+cardHeight+"px;width:"+cardWidth+"px;background-image:url('"+location.host+"/cgm/images/agot/back.jpg');background-position:center center;background-repeat:no-repeat;background-size:100%;",
     });
     domClass.add(back,"back behind");
     domConstruct.place(back,card);
@@ -105,7 +107,8 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
     var rnum = Math.floor((Math.random()*120)+1);
     if(rnum.toString().length == 1) rnum = "00"+rnum;
     if(rnum.toString().length == 2) rnum = "0"+rnum;
-    var thisCard = createCard("g0001p0001c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg");
+    console.log(location.host+"/cgm/images/agot/A Clash of Arms/"+rnum+".jpg");
+    var thisCard = createCard("g0001p0001c000"+(i+1),location.host+"/cgm/images/agot/A Clash of Arms/"+rnum+".jpg");
     domConstruct.place(thisCard,"gameArea");
     //var xVar=((handWidth/7*i+cardWidth/2)-handWidth*.5)/*+consoleWidth+actionsWidth*/;
     var xVar=(handWidth/7*i+cardWidth/5)-window.innerWidth/2+consoleWidth;
@@ -119,7 +122,8 @@ require(["dojo/dom-construct","dojo/dom-class","dojo/parser","dojo/dnd/Moveable"
     var rnum = Math.floor((Math.random()*120)+1);
     if(rnum.toString().length == 1) rnum = "00"+rnum;
     if(rnum.toString().length == 2) rnum = "0"+rnum;
-    var thisCard = createCard("g0001p0002c000"+(i+1),location.href+"images/A Clash of Arms/"+rnum+".jpg");
+    console.log(location.host+"/cgm/images/agot/A Clash of Arms/"+rnum+".jpg");
+    var thisCard = createCard("g0001p0002c000"+(i+1),location.host+"/cgm/images/agot/A Clash of Arms/"+rnum+".jpg");
     domClass.add(thisCard,"opponent");
     domClass.add(thisCard.firstElementChild,"behind");
     domClass.remove(thisCard.lastElementChild,"behind");

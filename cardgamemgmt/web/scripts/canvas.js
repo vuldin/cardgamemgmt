@@ -39,7 +39,7 @@ var selectGroup=new Kinetic.Group({
 });
 var cardWidth=null;
 var cardHeight=null;
-var apple=navigator.userAgent.match(/(iPhone)|(iPod)/); // is iPhone
+var apple=navigator.userAgent.match(/(iPhone)|(iPod)/);
 var found=null;
 var mousedownTimeout=null;
 var cancelMouseup=null;
@@ -48,7 +48,7 @@ var orientationTimeout=null;
 /* TODO remove color and colorNum variables */
 var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey"];
 var colorNum;
-var debug=false;
+var debug=true;
 function log(origin,msg){
   if(debug)console.log(origin+': '+msg);
 }

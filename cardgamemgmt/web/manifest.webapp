@@ -8,7 +8,7 @@
   "icons":{
     "128":"/icon.png"
   },
-  "launch_path":"/canvas.htm",
+  "launch_path":"/index.htm",
   "installs_allowed_from":["*"],
   "default_locale":"en"
 }
