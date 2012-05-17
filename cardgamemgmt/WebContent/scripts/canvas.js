@@ -19,13 +19,15 @@ var selectGroup=new Kinetic.Group({
 var cardWidth=null;
 var cardHeight=null;
 var apple=navigator.userAgent.match(/(iPhone)|(iPod)/); // is iPhone
-var found;
+var found=null;
+var mousedownTimeout=null;
+var cancelMouseup=null;
 var resizeTimeout=null;
 var orientationTimeout=null;
 /* TODO remove color and colorNum variables */
 var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey"];
 var colorNum;
-var debug=true;
+var debug=false;
 function log(origin,msg){
   if(debug)console.log(origin+': '+msg);
 }
@@ -152,8 +154,8 @@ function removeCard(card){
 }
 */
 // createCard will only be called when a card needs to be displayed on screen
-function createCard(cardJSON){
-  var card = new Kinetic.Rect(cardJSON);
+function createCard(cardPos){
+  var card = new Kinetic.Rect(deck.getAttrs().cards[cardPos]);
   /* TODO dynamically add listener functions to each card as needed
    * these functions would need to be moved out of createCard */
   /* TODO add text to cards */
@@ -184,6 +186,8 @@ function createCard(cardJSON){
     }
   });
   card.on("dragstart", function(){
+    log('card dragstart','clearing mousedownTimeout');
+    clearTimeout(mousedownTimeout);
     cardFrontLayer.draw();
   });
   card.on("dragmove", function(){
@@ -197,36 +201,62 @@ function createCard(cardJSON){
     document.body.style.cursor = "default";
   });
   card.on('mousedown touchstart',function(){
-    /* TODO deselect card after 1 second */
     log('card mousedown','mousedown on '+card.getAttrs().id);
-    if(!card.getAttrs().selected){
-      //selectCard(card);
-      //if(typeof previousSelected!='undefined'&&card!=previousSelected){
-      if(typeof previousSelected!='undefined'){
-        log('card mousedown','deselecting '+previousSelected.getAttrs().id);
-        //deselectCard(previousSelected);
-        previousSelected.getAttrs().selected=false;
+    mousedownTimeout=setTimeout(function(){
+      log('card mousedown','canceling mouseup');
+      cancelMouseup=true;
+      if(card.getAttrs().selected){
+        log('card mousedown','deselecting '+card.getAttrs().id);
+        card.getAttrs().selected=false;
       }
-      log('card mousedown','selecting '+card.getAttrs().id);
-      card.getAttrs().selected=true;
-      log('card mousedown','setting previousSelected to '+card.getAttrs().id);
-      previousSelected=card;
       found=false;
-      for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
+      //for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
+      for(var i in selectGroup.children)if(selectGroup.children[i]==card){
         log('card mousedown',card.getAttrs().id+' is found in selectGroup');
         found=true;
       }
-      if(!found){
-        log('card mousedown','adding '+card.getAttrs().id+' to selectGroup');
-        selectGroup.add(card);
+      if(found){
+        log('card mousedown','removing '+card.getAttrs().id+' from selectGroup');
+        selectGroup.remove(card);
       }
-      log('card mousedown','selectGroup size: '+selectGroup.children.length);
-      log('card mousedown','moving '+card.getAttrs().id+' to top of layer');
-      card.moveToTop();
-      cardFrontLayer.draw();
-    }
+    },1000);
+    
   });
-  card.on('mouseup touchend',function(){});
+  card.on('mouseup touchend',function(){
+    log('card mouseup','clearing mousedownTimeout');
+    clearTimeout(mousedownTimeout);
+    if(!cancelMouseup){
+      log('card mouseup','mouseup on '+card.getAttrs().id);
+      if(!card.getAttrs().selected){
+        //selectCard(card);
+        //if(typeof previousSelected!='undefined'&&card!=previousSelected){
+        if(typeof previousSelected!='undefined'){
+          log('card mouseup','deselecting '+previousSelected.getAttrs().id);
+          //deselectCard(previousSelected);
+          previousSelected.getAttrs().selected=false;
+        }
+        log('card mouseup','selecting '+card.getAttrs().id);
+        card.getAttrs().selected=true;
+        log('card mouseup','setting previousSelected to '+card.getAttrs().id);
+        previousSelected=card;
+        found=false;
+        for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
+          log('card mouseup',card.getAttrs().id+' is found in selectGroup');
+          found=true;
+        }
+        if(!found){
+          log('card mouseup','adding '+card.getAttrs().id+' to selectGroup');
+          selectGroup.add(card);
+        }
+        log('card mouseup','selectGroup size: '+selectGroup.children.length);
+        log('card mouseup','moving '+card.getAttrs().id+' to top of layer');
+        card.moveToTop();
+        cardFrontLayer.draw();
+      }
+    }
+    log('card mouseup','reseting cancelMouseup');
+    cancelMouseup=false;
+  });
   cardFrontLayer.add(card);
   return card;
 }; // end createCard function
@@ -262,9 +292,12 @@ function resizeCanvas(){
     arr[i].height=window.innerHeight;
     if(i<2){
       log('resizeCanvas','set canvas to black');
+      /*
       canvasCtx=arr[i].getContext('2d');
       canvasCtx.fillStyle = 'black';
       canvasCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      */
+      log('resizeCanvas',stage);
     }
   }
   log('resizeCanvas','resizing stage');
@@ -340,6 +373,89 @@ function setPrevWinSizes(){
   prevWinHeight=window.innerHeight;
 }
 
+/*
+function CardCollection(info){
+  //Kinetic.Group.call(this,info);
+  log('CardCollection','info: '+info);
+  CardCollection.prototype=Object.create(new Kinetic.Group(info),{
+    shuffle:function(){
+      log('CardCollection','inside shuffle');
+      // TODO ensure order array is always ready
+      var s=[];
+      while(this.getAttrs().order.length)s.push(this.getAttrs().order.splice(Math.random()*this.getAttrs().order.length,1));
+      while(s.length)this.getAttrs().order.push(s.pop());
+      return this.getAttrs().order;
+    }
+  });
+  log('CardCollection','cc proto: '+CardCollection.prototype);
+}
+CardCollection=new Kinetic.Group({
+  draggable: false,
+  id: 'CCID',
+  name: 'CCNAME',
+  owner: 'CCOWNER',
+  session: 'CCSESSION',
+  cards:[],
+  order:[]
+});
+CardCollection.addCards=function(cards){
+  // TODO add card objects to cards array and increment order array length
+  // this function will likely not be used during matches
+};
+CardCollection.shuffle=function(){
+  // TODO ensure order array is always ready
+  var s=[];
+  while(this.getAttrs().order.length)s.push(this.getAttrs().order.splice(Math.random()*this.getAttrs().order.length,1));
+  while(s.length)this.getAttrs().order.push(s.pop());
+  return this.getAttrs().order;
+};
+CardCollection.draw=function(num){
+  var drawArr=[];
+  for(var i=0;i<num;i++){
+    drawArr.push(CardCollection.getAttrs().cards[CardCollection.getAttrs().order[0]]);
+    CardCollection.getAttrs().order.splice(0,1);
+  }
+  return drawArr;
+};
+CardCollection.addCardToTop=function(){
+};
+CardCollection.addCardToBottom=function(){
+};
+*/
+function shuffle(){
+  //log('deck','inside shuffle');
+  /* TODO ensure order array is always ready */
+  var s=[];
+  while(this.getAttrs().order.length)s.push(this.getAttrs().order.splice(Math.random()*this.getAttrs().order.length,1));
+  while(s.length)this.getAttrs().order.push(s.pop());
+  //return this.getAttrs().order;
+}
+function addCardsToTop(cardArray){
+  /* TODO the deck collection should likely be the only collection to have addCardsToTop
+   * other may have a similar function, but one that uses the positions found in the order array */
+  log('deck.addCardsToTop','BEFORE cards size: '+this.getAttrs().cards.length+', order size: '+this.getAttrs().order.length);
+  log('deck.addCardsToTop','new length of cards should be '+(this.getAttrs().cards.length+cardArray.length));
+  for(var i in cardArray){
+    log('deck.addCardsToTop','adding '+cardArray[i].id+' to bottom of cards');
+    this.getAttrs().cards.push(cardArray[i]);
+    log('deck.addCardsToTop','adding '+(this.getAttrs().cards.length-1)+' to top of order');
+    this.getAttrs().order.unshift(this.getAttrs().cards.length-1);
+  }
+  log('deck.addCardsToTop','AFTER cards size: '+this.getAttrs().cards.length+', order size: '+this.getAttrs().order.length);
+}
+function drawCards(num){
+  /* returns position of drawn cards in card array
+   * this result should always be added to another card collection (hand, graveyard, etc.) */
+  log('drawCards','drawing '+num+' cards');
+  log('drawCards','first should be '+this.getAttrs().order[0]+', last should be '+this.getAttrs().order[(num-1)]);
+  var result=this.getAttrs().order.splice(0,num);
+  log('drawCards','result('+result.length+'): '+result);
+  log('drawCards','order('+this.getAttrs().order.length+'): '+this.getAttrs().order);
+  return result;
+}
+function playCard(cardPos){
+  /* TODO put card referred to with cardPos onto the table and remove from this collection (usually hand) */
+}
 // begin window functions
 window.onload = function(){
   stage = new Kinetic.Stage({
@@ -353,8 +469,8 @@ window.onload = function(){
   });
   cardFrontLayer = new Kinetic.Layer();
   /* TODO populate player and session variables with values from server */
-  player = { id: 'PLAYERID' };
-  opponent = { id: 'OPPONENTID' };
+  player = {id:'PLAYERID'};
+  opponent = {id:'OPPONENTID'};
   session = {
     id:'SESSIONID',
     players:[player,opponent],
@@ -367,17 +483,24 @@ window.onload = function(){
     draggable: false,
     id: 'DECKID',
     name: 'deck1',
-    //player: player.id,
     owner: player.id,
     session: session.id,
-    cards:[] /* TODO the deck object should only provide card information via server request */
+    cards:[], /* TODO the deck object should only provide card information via server request */
+    order:[],
+    shuffle:shuffle,
+    addCardsToTop:addCardsToTop,
+    drawCards:drawCards,
+    play:playCard
   });
   hand = new Kinetic.Group({
     draggable:false,
     id:'HANDID',
     name:'hand1',
     owner:player.id,
-    session:session.id
+    session:session.id,
+    //cards:[],
+    order:[],
+    play:playCard
   });
   /* TODO resizeCanvas tries to resize 3rd canvas before it exists */
   resizeCanvas();
@@ -395,7 +518,8 @@ window.onload = function(){
    * 1. generate deck info (including json for each card)
    * 2. server will be responsible for shuffling deck and keeping track of card order/location
    * 3. createCard(server.drawCards(7)); */
-  var cardAmount=7;
+  var cardAmount=60;
+  var cardJSONarr=[];
   for(var i=0;i<cardAmount;i++){
     colorNum=Math.floor(Math.random()*7);
     /* TODO set dragConstraints/dragBounds when in hand/inPlay areas */
@@ -435,11 +559,23 @@ window.onload = function(){
     //cardJSON = server.createCard(cardJSON); // server will return the JSON variable with remaining values filled in
     /* all cards should start included in the associated player's deck
      * cards will move between the library/hand/discard/dead/etc groups throughout the game */
-    deck.attrs.cards.push(cardJSON);
-    log("onload","creating "+cardJSON.name+" and adding to "+player.id+"'s hand");
-    //hand.add(createCard(cardJSON));
-    hand.add(createCard(cardJSON));
+    cardJSONarr.push(cardJSON);
+    log('onload','created '+cardJSONarr.length+' cards so far');
   } // end card for loop
+  log('onload','creating '+cardJSONarr.length+' cards in deck '+deck.getAttrs().id);
+  deck.addCardsToTop(cardJSONarr);
+  log('onload','created '+deck.getAttrs().cards.length+' cards in deck '+deck.getAttrs().id);
+  log('onload','shuffling...');
+  deck.shuffle();
+  log("onload",'drawing starting hand');
+  var startingHand=deck.drawCards(7);
+  for(var cardPos in startingHand){
+    hand.getAttrs().order.push(startingHand[cardPos]);
+    //hand.getAttrs().cards.push(deck.getAttrs().cards[cardPos]);
+    hand.add(createCard(startingHand[cardPos]));
+  }
+  //hand.add(createCard(deck.drawCards(7)));
+
   /* TODO see if there is a tap event to add to this listener */
   cardFrontLayer.on('click', function(evt) {
     /* TODO layer's click handler isn't called when the click occurs outside of the layer's shapes */
@@ -472,9 +608,8 @@ window.onload = function(){
   cardFrontLayer.add(hand);
   cardFrontLayer.add(selectGroup);
   stage.add(cardFrontLayer);
-  //sizing();
   setPrevWinSizes();
-}; // end onload function
+  }; // end onload function
 /*
 document.onkeyup(function(evt){
   if (evt.keyCode==27){
