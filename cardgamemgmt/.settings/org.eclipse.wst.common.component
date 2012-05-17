@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-modules id="moduleCoreId" project-version="1.5.0">
     <wb-module deploy-name="cardgamemgmt">
-        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="java-output-path" value="/cardgamemgmt/build/classes"/>
-        <property name="context-root" value="cardgamemgmt"/>
+        <wb-resource deploy-path="/" source-path="/web"/>
+        <property name="context-root" value="cgm"/>
     </wb-module>
 </project-modules>

@@ -1,0 +1,14 @@
+{
+  "name":"CardGameMGMT",
+  "developer":{
+    "name":"Joshua Purcell",
+    "url":"http://jlp.doesntexist.org"
+  },
+  "description":"CardGameMGMT (or CGM) is a card game/management app which aims to be a web-based alternative OCTGN",
+  "icons":{
+    "128":"/icon.png"
+  },
+  "launch_path":"/canvas.htm",
+  "installs_allowed_from":["*"],
+  "default_locale":"en"
+}
