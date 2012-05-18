@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Cardgamemgmt by joshuapurcell</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/joshuapurcell/cardgamemgmt">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/joshuapurcell/cardgamemgmt/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/joshuapurcell/cardgamemgmt/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Cardgamemgmt</h1>
+          <p>TCG match and management webapp following the Open Packaging Convention (OPC) for game and card set definitions.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/joshuapurcell">joshuapurcell</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>CardGameMgmt</h1>
+
+<h2>Overview</h2>
+
+<p>This repository contains a trading card game (TCG) tournament/management web application. The name of this project is CardGameMgmt, or CGM.
+CGM aims to be a web-based alternative to other applications such as OCTGN, and the plan is to be compatible with the deck format used in that project.
+For more information on OCTGN see <a href="https://github.com/kellyelton/OCTGN">https://github.com/kellyelton/OCTGN</a>.</p>
+
+<h2>Setup</h2>
+
+<p>CGM follows the format for Mozilla webapps, and will be included in the upcoming Mozilla Marketplace (<a href="https://marketplace.mozilla.org/en-US/login">https://marketplace.mozilla.org/en-US/login</a>).
+CGM is based on HTML5, using canvas, localStorage, appCache, file API, etc. The latest version of the jquery framework is also being used. There is 
+a separate implementation of some UI components which makes use of Dojo 1.7 and CSS styling (this implementation is not currently the main 
+implementation).</p>
+
+<h2>Multi-user plans</h2>
+
+<p>The current plan is to not host game sessions between multiple users on a standalone server. Instead, the hope is that server functionality will be 
+included in each application. Requests/responses will be verified by other connecting users based on agreed-upon session information, and clients 
+themselves will be verified as being the correct version (and expected files) through the webapp manifest and HTML5 file APIs (md5sum, etc.).</p>
+
+<p>This plan may prove to be impossible for adequately ensuring fair play during card games, but the hope is that a "high-enough" barrier to cheating 
+will be part of the app design so that cheating will be too hard to accomplish for the vast majority of users.</p>
+
+<p>A server will be in place for the basic purposes of hosting the lastest version of the client as well as allowing for clients to advertise their 
+availability for various card games. Client authentication will likely be based on BrowserID, and the server could possibly collect match win/loss 
+info for those clients who choose to report this information.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
