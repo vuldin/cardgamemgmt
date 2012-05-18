@@ -25,9 +25,6 @@ var player;
 var session;
 var deck;
 var hand;
-//var selectTimeout;
-//var prevWinWidth;
-//var prevWinHeight;
 var previousSelected;
 var cardWidthRatio=.06;
 var cardHeightRatio=.18;
@@ -37,9 +34,6 @@ var selectGroup=new Kinetic.Group({
 });
 var cardWidth=null;
 var cardHeight=null;
-//var apple=navigator.userAgent.match(/(iPhone)|(iPod)/);
-//var resizeTimeout=null;
-//var orientationTimeout=null;
 /* TODO remove color and colorNum variables */
 var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey"];
 var colorNum;
@@ -49,115 +43,7 @@ var colorNum;
 /* TODO find out how group movement behaves if restrictions are placed on one card in the group */
 /* TODO is card.ready boolean needed? */
 // createCard will only be called when a card needs to be displayed on screen
-/*
-function resizeCanvas(){
-  var arr=null;
-  // TODO test the correct functions work on apple devices
-  //rc++;
-  if(apple){
-    //$("#container div").height($(window).height() + 60);
-    arr=document.getElementsByTagName('div');
-    for(var i=1;i<arr.length;i++){
-      arr[i].style.height=(window.innerHeight+60)+'px';
-    }
-    //$("canvas").height($(window).height() + 60);
-    arr=document.getElementsByTagName('canvas');
-    for(var i=1;i<arr.length;i++){
-      arr[i].height=(window.innerHeight+60);
-    }
-  }
-  arr=document.getElementsByTagName('div');
-  //console.log('div: '+arr.length);
-  for(var i=1;i<arr.length;i++){
-    //console.log('current div iteration: '+i);
-    document.getElementsByTagName('div')[i].style.width=window.innerWidth+'px';
-    document.getElementsByTagName('div')[i].style.height=window.innerHeight+'px';
-  }
-  arr=document.getElementsByTagName('canvas');
-  log('setup','resizeCanvas','canvas: '+arr.length);
-  for(var i=0;i<arr.length;i++){
-    log('setup','resizeCanvas','current canvas iteration: '+i);
-    //console.log('setting width/height to '+window.innerWidth+'/'+window.innerHeight);
-    arr[i].width=window.innerWidth;
-    arr[i].height=window.innerHeight;
-    if(i<2){
-      log('setup','resizeCanvas','set canvas to black');
-      //canvasCtx=arr[i].getContext('2d');
-      //canvasCtx.fillStyle = 'black';
-      //canvasCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-      log('setup','resizeCanvas',stage);
-    }
-  }
-  log('setup','resizeCanvas','resizing stage');
-  stage.attrs.width=window.innerWidth;
-  stage.attrs.height=window.innerHeight;
-  //console.log('now should be '+window.innerWidth+'/'+window.innerHeight+': '+document.getElementsByTagName('div')[1].style.width+'/'+document.getElementsByTagName('div')[1].style.height);
-  log('setup','resizeCanvas','now should be '+window.innerWidth+'/'+window.innerHeight+':');
-  log('setup','resizeCanvas',document.getElementsByTagName('div')[1]);
-  if(document.getElementsByTagName('canvas')[2])log('setup',document.getElementsByTagName('canvas')[2]);
-  // hide webkit url bar
-  if(apple){
-    setTimeout(function(){
-      window.scrollTo(0,1);
-    }, 100);   
-  }
-  ctx.fillStyle = 'green';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'black';
-  ctx.fillRect(10, 10, width - 20, height - 20);
-  ctx.fillStyle = 'black';
-  ctx.textAlign = 'center';
-  ctx.fillText('Orientiation changes: '+oc, width/2, height/2);
-  ctx.fillText('Resize events: '+rc, width/2, height/2+10);
-  //cardFrontLayer.draw();
-} // end resizeCanvas
-function scaleObjects(){
-  // resizeCanvas before scaleObjects
-  // TODO test scaling shapes instead of the stage
-  //if(window.innerWidth<window.innerHeight) stage.setScale(window.innerWidth/1920,window.innerWidth/1920);
-  //else stage.setScale(window.innerHeight/1200,window.innerHeight/1200);
-  log('setup','scaleObjects','innerWidth: '+window.innerWidth);
-  log('setup','scaleObjects','innerHeight: '+window.innerHeight);
-  stage.setScale(window.innerHeight/1200,window.innerHeight/1200);
-  //stage.setScale(prevWinHeight/window.innerHeight,prevWinHeight/window.innerHeight);
-  //for(var i=0;i<stage.getChildren();i++){
-    //stage.getChildren()[i].setScale(window.innerWidth/1920,window.innerHeight/1200);
-  //}
-} // end scaleObjects()
-function resizeCards(cardArr){
-  // TODO update cardHeight/cardWidth multipliers based on actual ratios
-  // TODO use size of layer instead of window (always call scaleObjects prior to resizeCards)
-  if(window.innerWidth<window.innerHeight){
-  //if(cardFrontLayer.getCanvas().width<cardFrontLayer.getCanvas().height){
-    cardWidth = window.innerWidth*cardWidthRatio;
-    cardHeight = cardWidth*1.428571429;
-  } else {
-    cardHeight = window.innerHeight*cardHeightRatio;
-    cardWidth = cardHeight*.7;
-  }
-  // TODO will likely need to allow for multiple visible layers (currently hardcoded to first layer)
-  log('setup','resizeCards','using previous window width/height ('+prevWinWidth+'/'+prevWinHeight+')');
-  for(var i=0;i<cardArr.length;i++){
-    var child=cardArr[i];
-    var xRatio=child.getX()/prevWinWidth;
-    var yRatio=child.getY()/prevWinHeight;
-    child.setX(Math.round(window.innerWidth*xRatio));
-    child.setY(Math.round(window.innerHeight*yRatio));
-    child.attrs.width=cardWidth;
-    child.attrs.height=cardHeight;
-  }
-} // end resizeCards
-function orientationChange(){
-  //oc++;
-}
-function setPrevWinSizes(){
-  // TODO fix prevWinWidth/Height
-  log('setup','setPrevWinSizes','saving window width/height ('+window.innerWidth+'/'+window.innerHeight+')');
-  prevWinWidth=window.innerWidth;
-  prevWinHeight=window.innerHeight;
-}
 // begin window functions
-*/
 window.onload = function(){
   stage = new Kinetic.Stage({
     container: "container",
@@ -262,8 +148,8 @@ window.onload = function(){
     //console.log((window.innerWidth-((cardWidth+cardWidth*.2)*(cardAmount-1)))/2+(cardWidth+cardWidth*.2)*i);
     // send the JSON variable to the server as argument to the remote createCard (?) function
     //cardJSON = server.createCard(cardJSON); // server will return the JSON variable with remaining values filled in
-    /* all cards should start included in the associated player's deck
-     * cards will move between the library/hand/discard/dead/etc groups throughout the game */
+    /* all cards should start included in the associated player's deck (loaded from OPC? file)
+     * pointers to a specific card's position in the deck will move between the library/hand/discard/dead/etc groups throughout the game */
     cardJSONarr.push(cardJSON);
     log('setup','onload','created '+cardJSONarr.length+' cards so far');
   } // end card for loop
@@ -314,7 +200,6 @@ window.onload = function(){
   cardFrontLayer.add(hand);
   cardFrontLayer.add(selectGroup);
   stage.add(cardFrontLayer);
-  //setPrevWinSizes();
   }; // end onload function
 /*
 document.onkeyup(function(evt){
@@ -323,60 +208,3 @@ document.onkeyup(function(evt){
   }
 });
 */
-/*
-window.onresize=function(){
-  clearTimeout(resizeTimeout);
-  // TODO add resizeCards
-  resizeTimeout=setTimeout(function(){
-    log('setup','onresize','resizing...');
-    //alert('resizeCanvas');
-    resizeCanvas();
-    //alert('scaleObjects');
-    scaleObjects();
-    //alert('resizeCards');
-    //resizeCards(cardFrontLayer.getChildren());
-    //alert('setPrevWinSizes');
-    setPrevWinSizes();
-    //alert('draw card layer');
-    cardFrontLayer.draw();
-  }, 100);
-};
-window.onorientationchange=function(){
-  // TODO test clearing resizeTimeout and calling onresize
-  clearTimeout(orientationTimeout);
-  clearTimeout(resizeTimeout);
-  orientationTimeout=setTimeout(function(){
-    log('setup','onorientationchange','orienting...');
-    orientationChange();
-    alert('resizeCanvas');
-    resizeCanvas();
-    alert('scaleObjects');
-    scaleObjects();
-    //alert('resizeCards');
-    //resizeCards(cardFrontLayer.getChildren());
-    alert('setPrevWinSizes');
-    setPrevWinSizes();
-    alert('draw card layer');
-    cardFrontLayer.draw();
-  },50);
-};
-*/
-function sizing(){
-  /* TODO sizing tasks:
-   * during resize, scale the needed layers and resize stage, canvas, div and any other needed elements
-   * size of canvas should probably be scaled down from 1920:1200 */
-  // cardFrontLayer.setScale(.5,.5);cardFrontLayer.setX(stage.getWidth()/2);cardFrontLayer.setY(stage.getHeight()/2);cardFrontLayer.draw();
-  //document.getElementsByTagName('canvas')[2].setAttribute("id","canvas");
-  //document.getElementsByTagName('div')[1].style.width='';
-  //document.getElementsByTagName('div')[1].style.height='';
-  //console.log(document.getElementsByTagName('div')[1]);
-  //var canvas = document.getElementById("canvas");
-  //var ctx = document.getElementsByTagName('canvas')[2].getContext('2d');
-  //console.log(ctx);
-  //var rc = 0;  // resize counter
-  //var oc = 0;  // orientiation counter
-
-}; // end sizing
-// run sizing once DOM is ready
-//if (document.addEventListener) document.addEventListener("DOMContentLoaded", sizing, false);
-//if (document.addEventListener) document.addEventListener("DOMContentLoaded", new function(){console.log('dom ready');}, false);
