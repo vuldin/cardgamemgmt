@@ -20,9 +20,9 @@
  * http://www.gnu.org/licenses/.
  */
 var collectionsDebug=false;
-var cardsDebug=false;
+var cardsDebug=true;
 var layoutDebug=false;
-var setupDebug=true;
+var setupDebug=false;
 function log(origin,func,msg){
   if(collectionsDebug&&origin=='collections')console.log(origin+'.'+func+': '+msg);
   if(cardsDebug&&origin=='cards')console.log(origin+'.'+func+': '+msg);

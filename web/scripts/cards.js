@@ -22,15 +22,72 @@
 var found=null;
 var mousedownTimeout=null;
 var cancelMouseup=null;
+function mouseUp(card){
+    log('cards','mouseUp','clearing mousedownTimeout');
+    clearTimeout(mousedownTimeout);
+    if(!cancelMouseup){
+      log('cards','mouseUp','mouseup on '+card.getAttrs().id);
+      //if(!card.getAttrs().selected){
+        //if(typeof previousSelected!='undefined'&&card!=previousSelected){
+        if(typeof previousSelected!='undefined'){
+          log('cards','mouseUp','deselecting '+previousSelected.getAttrs().id);
+          previousSelected.getAttrs().selected=false;
+          log('cards','mouseUp','removing any shadow from '+previousSelected.getAttrs().id);
+          previousSelected.setShadowColor('');
+          previousSelected.setShadowOffset();
+          previousSelected.setShadowBlur(5);
+          //previousSelected.applyShadow();
+          /* TODO check shift key status */
+          if(false){
+            log('cards','mouseUp','setting selectGroup shadow on '+card.getAttrs().id);
+            previousSelected.setShadowColor('yellow');
+          }
+        }
+        log('cards','mouseUp','selecting '+card.getAttrs().id);
+        card.getAttrs().selected=true;
+        log('cards','mouseUp','setting primary shadow on '+card.getAttrs().id);
+        card.setShadowColor('blue');
+        card.setShadowOffset(0,0);
+        card.setShadowBlur(5);
+        log('cards','mouseUp','setting previousSelected to '+card.getAttrs().id);
+        previousSelected=card;
+        /* TODO check for shift key pressed before adding to selectGroup */
+        if(false){
+          found=false;
+          for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
+            log('cards','mouseUp',card.getAttrs().id+' is found in selectGroup');
+            found=true;
+          }
+          if(!found){
+            log('cards','mouseUp','adding '+card.getAttrs().id+' to selectGroup');
+            selectGroup.add(card);
+            //if(card.getAttrs().selected==false){
+            log('cards','mouseUp','setting selectGroup shadow on '+card.getAttrs().id);
+            card.setShadowColor('yellow');
+            //card.setShadowOffset(1,1);
+            card.setShadowBlur(15);
+            //card.applyShadow();
+            log('cards','mouseUp','color/offset/blur: '+card.getShadowColor()+'/'+card.getShadowOffset()+'/'+card.getShadowBlur());
+          }
+          log('cards','mouseUp','selectGroup size: '+selectGroup.children.length);
+        } // end selectGroup changes
+        log('cards','mouseUp','moving '+card.getAttrs().id+' to top of layer');
+        card.moveToTop();
+        cardFrontLayer.draw();
+      //}
+    }
+    log('cards','mouseUp','reseting cancelMouseup');
+    cancelMouseup=false;
+} // end mouseUp
 function createCard(cardPos){
   var card = new Kinetic.Rect(deck.getAttrs().cards[cardPos]);
   /* TODO dynamically add listener functions to each card as needed
    * these functions would need to be moved out of createCard */
-  /* TODO add text to cards */
+  /* TODO should card be Kinetic.Text (instead of Rect)? */
   //console.log(card);
   //card.setText(card.name,card.width/2,card.height/2);
   //cardFrontLayer.getContext().fillText(cardJSON.name,cardJSON.x,(cardJSON.y-20));
-  card.on('click', function() {});
+  card.on('click',function(){});
   card.on("dblclick dbltap", function(){
     if(!card.getAttrs().turned){
       card.transitionTo({
@@ -53,78 +110,64 @@ function createCard(cardPos){
       });
     }
   });
-  card.on("dragstart", function(){
-    log('card dragstart','clearing mousedownTimeout');
+  card.on('dragstart',function(){
+    this.moveToTop();
+    log('cards','dragstart','clearing mousedownTimeout');
     clearTimeout(mousedownTimeout);
     cardFrontLayer.draw();
   });
-  card.on("dragmove", function(){
-    document.body.style.cursor = "pointer";
+  card.on('dragend',function(){
+    log('cards','dragend','stopped');
+    mouseUp(this);
   });
-  card.on("mouseover", function(){
-    document.body.style.cursor = "pointer";
+  card.on('dragmove',function(){
+    document.body.style.cursor='pointer';
+    log('cards','dragmove','setting selectGroup shadow on '+this.getAttrs().id);
+    this.setShadowColor('#3f3f3f');
+    this.setShadowOffset(8,8);
+    //this.setShadowBlur(15);
+    //card.applyShadow();
+    //cardFrontLayer.draw();
+  });
+  card.on("mouseover",function(){
+    document.body.style.cursor="pointer";
     /* TODO show card popup */
   });
-  card.on("mouseout", function(){
-    document.body.style.cursor = "default";
+  card.on("mouseout",function(){
+    document.body.style.cursor="default";
   });
   card.on('mousedown touchstart',function(){
     log('card mousedown','mousedown on '+card.getAttrs().id);
     mousedownTimeout=setTimeout(function(){
-      log('card mousedown','canceling mouseup');
+      log('cards','mousedown','canceling mouseup');
       cancelMouseup=true;
       if(card.getAttrs().selected){
-        log('card mousedown','deselecting '+card.getAttrs().id);
+        log('cards','mousedown','deselecting '+card.getAttrs().id);
         card.getAttrs().selected=false;
       }
       found=false;
-      //for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
       for(var i in selectGroup.children)if(selectGroup.children[i]==card){
-        log('card mousedown',card.getAttrs().id+' is found in selectGroup');
+        log('cards','mousedown',card.getAttrs().id+' is found in selectGroup');
         found=true;
       }
       if(found){
-        log('card mousedown','removing '+card.getAttrs().id+' from selectGroup');
+        log('cards','mousedown','removing '+card.getAttrs().id+' from selectGroup');
         selectGroup.remove(card);
       }
+      log('cards','mousedown','removing any shadow on '+card.getAttrs().id);
+      card.setShadowColor('');
+      card.setShadowOffset();
+      card.setShadowBlur(5);
+      //card.applyShadow();
+      cardFrontLayer.draw();
+      //log('cards','mousedown','color/offset/blur: '+card.getShadowColor()+'/'+card.getShadowOffset()+'/'+card.getShadowBlur());
     },1000);
-    
-  });
+  }); // end mousedown
+  
   card.on('mouseup touchend',function(){
-    log('card mouseup','clearing mousedownTimeout');
-    clearTimeout(mousedownTimeout);
-    if(!cancelMouseup){
-      log('card mouseup','mouseup on '+card.getAttrs().id);
-      if(!card.getAttrs().selected){
-        //selectCard(card);
-        //if(typeof previousSelected!='undefined'&&card!=previousSelected){
-        if(typeof previousSelected!='undefined'){
-          log('card mouseup','deselecting '+previousSelected.getAttrs().id);
-          //deselectCard(previousSelected);
-          previousSelected.getAttrs().selected=false;
-        }
-        log('card mouseup','selecting '+card.getAttrs().id);
-        card.getAttrs().selected=true;
-        log('card mouseup','setting previousSelected to '+card.getAttrs().id);
-        previousSelected=card;
-        found=false;
-        for(var i=0;i<selectGroup.children.length;i++)if(selectGroup.children[i]==card){
-          log('card mouseup',card.getAttrs().id+' is found in selectGroup');
-          found=true;
-        }
-        if(!found){
-          log('card mouseup','adding '+card.getAttrs().id+' to selectGroup');
-          selectGroup.add(card);
-        }
-        log('card mouseup','selectGroup size: '+selectGroup.children.length);
-        log('card mouseup','moving '+card.getAttrs().id+' to top of layer');
-        card.moveToTop();
-        cardFrontLayer.draw();
-      }
-    }
-    log('card mouseup','reseting cancelMouseup');
-    cancelMouseup=false;
-  });
+    log('cards','mouseup','');
+    mouseUp(this);
+  }); // end mouseup
   cardFrontLayer.add(card);
   return card;
 }; // end createCard function
