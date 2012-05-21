@@ -167,19 +167,14 @@ window.onload = function(){
     hand.add(createCard(startingHand[cardPos]));
   }
   //hand.add(createCard(deck.drawCards(7)));
-
   /* TODO see if there is a tap event to add to this listener */
-  cardFrontLayer.on('click', function(evt) {
-    /* TODO layer's click handler isn't called when the click occurs outside of the layer's shapes */
-    log('setup','cardFrontLayer click','start');
+  cardFrontLayer.on('click', function(evt){
+    log('setup','cardFrontLayer click',evt.shape);
     if(!evt.shape){
-      for(var i=0;i<selectGroup.getChildren().length;i++){
-        /* TODO remove shadows from cards */
-      }
-      log('setup','cardFrontLayer click','removing selected cards');
-      selectGroup.removeChildren();
+      log('setup','cardFrontLayer click','clicked off a card');
+      clearSelection();
     }
-  },false);
+  },true);
   /*
   layer.on('click', function(evt) {
     // select shapes by name
@@ -201,10 +196,3 @@ window.onload = function(){
   cardFrontLayer.add(selectGroup);
   stage.add(cardFrontLayer);
   }; // end onload function
-/*
-document.onkeyup(function(evt){
-  if (evt.keyCode==27){
-    // TODO clear selection when hitting escape
-  }
-});
-*/

@@ -23,9 +23,13 @@ var collectionsDebug=false;
 var cardsDebug=true;
 var layoutDebug=false;
 var setupDebug=false;
+var keyboardDebug=false;
 function log(origin,func,msg){
-  if(collectionsDebug&&origin=='collections')console.log(origin+'.'+func+': '+msg);
-  if(cardsDebug&&origin=='cards')console.log(origin+'.'+func+': '+msg);
-  if(layoutDebug&&origin=='layout')console.log(origin+'.'+func+': '+msg);
-  if(setupDebug&&origin=='setup')console.log(origin+'.'+func+': '+msg);
+  var log=false;
+  if(collectionsDebug&&origin=='collections')log=true;
+  if(cardsDebug&&origin=='cards')log=true;
+  if(layoutDebug&&origin=='layout')log=true;
+  if(setupDebug&&origin=='setup')log=true;
+  if(keyboardDebug&&origin=='keyboard')log=true;
+  if(log)console.log(origin+'.'+func+': '+msg);
 }
