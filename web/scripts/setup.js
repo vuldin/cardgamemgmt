@@ -30,16 +30,14 @@ var cardWidthRatio=.06;
 var cardHeightRatio=.18;
 var selectGroup=new Kinetic.Group({
   /* TODO allow dragging of selectGroup via toggle */
-  draggable: false
+  draggable: true
 });
 var cardWidth=null;
 var cardHeight=null;
 /* TODO remove color and colorNum variables */
 var colors = ["red", "orange", "yellow", "green", "blue", "purple", "grey"];
-var colorNum;
+var colorNum=null;
 /* possibly add event handlers for dragging/interacting with group */
-/* TODO add/remove select shadow to card */
-/* TODO add/remove selectGroup shadow to card */
 /* TODO find out how group movement behaves if restrictions are placed on one card in the group */
 /* TODO is card.ready boolean needed? */
 // createCard will only be called when a card needs to be displayed on screen
@@ -93,9 +91,6 @@ window.onload = function(){
   });
   /* TODO resizeCanvas tries to resize 3rd canvas before it exists */
   //resizeCanvas();
-
-  //scaleObjects();
-  //resizeCards(cardFrontLayer.getChildren());
   cardWidth = window.innerWidth*cardWidthRatio;
   cardHeight = cardWidth*1.428571429;
   var extra = 10;
@@ -103,16 +98,11 @@ window.onload = function(){
   var maxx=window.innerWidth-minx-extra;
   var miny=cardHeight/2+extra;
   var maxy=window.innerHeight-miny-extra;
-  /* TODO remove card generating for loop
-   * instead do the following steps:
-   * 1. generate deck info (including json for each card)
-   * 2. server will be responsible for shuffling deck and keeping track of card order/location
-   * 3. createCard(server.drawCards(7)); */
+  /* TODO remove card generating for loop */
   var cardAmount=60;
-  var handAmount=7;
+  var handAmount=4;
   var cardJSONarr=[];
   for(var i=0;i<cardAmount;i++){
-    colorNum=Math.floor(Math.random()*7);
     /* TODO set dragConstraints/dragBounds when in hand/inPlay areas */
     // create JSON representation of the cards that will be loaded with as much info as possible filled in
     var cardJSON={
@@ -126,13 +116,6 @@ window.onload = function(){
       turned: false,
       flipped: false,
       ready: true, // is able to be interacted with (i.e. not in the middle of an animation)
-      /*
-      x:(minx+Math.round(Math.random()*(maxx-minx))),
-      y:(miny+Math.round(Math.random()*(maxy-miny))),
-      x:(window.innerWidth-((cardWidth+cardWidth*.2)*(cardAmount-1)))/2+(cardWidth+cardWidth*.2)*i,
-      y:window.innerHeight-(window.innerHeight*.01+cardHeight/2),
-      */
-      fill: colors[colorNum],
       stroke: "black",
       strokeWidth: 1,
       centerOffset: {
@@ -144,8 +127,6 @@ window.onload = function(){
       height: cardHeight,
       cornerRadius: 5
     };
-    //console.log('( (windowWidth - handWidth) / 2 ) + cardWidth * i');
-    //console.log((window.innerWidth-((cardWidth+cardWidth*.2)*(cardAmount-1)))/2+(cardWidth+cardWidth*.2)*i);
     // send the JSON variable to the server as argument to the remote createCard (?) function
     //cardJSON = server.createCard(cardJSON); // server will return the JSON variable with remaining values filled in
     /* all cards should start included in the associated player's deck (loaded from OPC? file)
@@ -160,21 +141,36 @@ window.onload = function(){
   deck.shuffle();
   log('setup',"onload",'drawing starting hand');
   var startingHand=deck.drawCards(handAmount);
-  for(var cardPos in startingHand){
-    hand.getAttrs().order.push(startingHand[cardPos]);
-    hand.setCardPos(startingHand[cardPos]);
-    //hand.getAttrs().cards.push(deck.getAttrs().cards[cardPos]);
-    hand.add(createCard(startingHand[cardPos]));
+  var newCard=null;
+  colorNum=0;
+  for(var i in startingHand){
+    // add this card reference to hand
+    hand.getAttrs().order.push(startingHand[i]);
+    // set color to next from colors array
+    newCard=createCard(startingHand[i]);
+    newCard.setFill(colors[colorNum]);
+    // add card UI object to hand
+    hand.add(newCard);
+    // find new x/y values for all cards in hand
+    hand.setCardPos();
+    // increment color
+    if(colorNum<6)colorNum+=1;
+    else colorNum=0;
   }
   //hand.add(createCard(deck.drawCards(7)));
   /* TODO see if there is a tap event to add to this listener */
   cardFrontLayer.on('click', function(evt){
-    log('setup','cardFrontLayer click',evt.shape);
+    log('setup','cardFrontLayer click','');
+    //console.log(evt.shape);
     if(!evt.shape){
       log('setup','cardFrontLayer click','clicked off a card');
       clearSelection();
     }
   },true);
+  stage.on('click',function(evt){
+    log('setup','stage click','');
+    console.log(evt.shape);
+  });
   /*
   layer.on('click', function(evt) {
     // select shapes by name

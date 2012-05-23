@@ -19,7 +19,8 @@
  * License along with CGM. If not, see
  * http://www.gnu.org/licenses/.
  */
-var found=null;
+//var cardVar=null;
+//var found=null;
 var mousedownTimeout=null;
 var cancelMouseup=null;
 function mouseUp(thisCard){
@@ -31,7 +32,6 @@ function mouseUp(thisCard){
         log('cards','mouseUp','found '+selectGroup.children.length+' other selected cards');
         // if shift isn't held down, handle all other cards
         for(var i in selectGroup.children){
-          console.log(selectGroup.children[i]);
           if(typeof previousSelected!='undefined'&&previousSelected==selectGroup.children[i]){
             log('cards','mouseUp','\tsetting selected to false for '+selectGroup.children[i].getAttrs().name);
             selectGroup.children[i].getAttrs().selected=false;
@@ -43,12 +43,10 @@ function mouseUp(thisCard){
           selectGroup.children[i].setShadowOffset();
           selectGroup.children[i].setShadowBlur(5);
           log('cards','mouseUp','\tafter color/offset/blur: '+selectGroup.children[i].getShadowColor()+'/'+selectGroup.children[i].getShadowOffset().x+'/'+selectGroup.children[i].getShadowBlur());
-          //log('cards','mouseUp','\tremoving '+selectGroup.children[i].getAttrs().name+' from selectGroup['+i+']');
-          //selectGroup.remove(selectGroup.children[i]);
-        } // finished handling all cards previously in selectGroup
+        }
         log('cards','mouseUp','\tremoving '+selectGroup.children.length+' cards from selectGroup');
         selectGroup.removeChildren();
-      }
+      } // finished handling all cards previously in selectGroup
       // handle this card
       log('cards','mouseUp','setting selected to true for '+thisCard.getAttrs().name);
       thisCard.getAttrs().selected=true;
@@ -67,7 +65,6 @@ function mouseUp(thisCard){
       log('cards','mouseUp',selectGroup.children.length+' cards in selectGroup');
       cardFrontLayer.draw();
     }
-    log('cards','mouseUp','reseting cancelMouseup');
     cancelMouseup=false;
     log('cards','mouseUp','complete');
 } // end mouseUp
@@ -84,6 +81,7 @@ function clearSelection(){
   }
   log('cards','clearSelection','removing '+selectGroup.children.length+' children');
   selectGroup.removeChildren();
+  log('cards','clearSelection',selectGroup.children.length+' cards in selectGroup');
 }
 function createCard(cardPos){
   var card = new Kinetic.Rect(deck.getAttrs().cards[cardPos]);
@@ -117,9 +115,8 @@ function createCard(cardPos){
     }
   });
   card.on('dragstart',function(){
-    log('cards','dragstart','clearing mousedownTimeout');
+    log('cards','dragStart','clearing mousedownTimeout');
     clearTimeout(mousedownTimeout);
-    //card.moveToTop(); // this causes an error
   });
   card.on('dragend',function(){
   });

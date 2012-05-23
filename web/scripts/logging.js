@@ -19,7 +19,7 @@
  * License along with CGM. If not, see
  * http://www.gnu.org/licenses/.
  */
-var collectionsDebug=false;
+var collectionsDebug=true;
 var cardsDebug=true;
 var layoutDebug=false;
 var setupDebug=false;

@@ -53,10 +53,23 @@ function drawCards(num){
 function playCard(cardPos){
   /* TODO put card referred to with cardPos onto the table and remove from this collection (usually hand) */
 }
-function setCardPos(cardPos){
-  deck.getAttrs().cards[cardPos].x=window.innerWidth-window.innerWidth/this.getAttrs().order.length/2;
-  //deck.getAttrs().cards[cardPos].x=window.innerWidth-window.innerWidth/7/2;
-  deck.getAttrs().cards[cardPos].y=window.innerHeight-window.innerHeight/4/2;
+function setCardPos(){
+  log('collections','setCardPos','hand.children size: '+hand.children.length);
+  for(var i in hand.children){
+    log('collections','setCardPos','\thand.children['+i+']: '+hand.children[i].getAttrs().name);
+    /* TODO may not need the following if statement
+     * the deck representation of the be getting modified, but the hand representation may still be the previous x/y values */
+    log('collections','setCardPos','\thand.children['+i+'].x: '+(window.innerWidth-(window.innerWidth/hand.children.length*(hand.children.length-i))));
+    //deck.getAttrs().cards[hand.getAttrs().order[i]].x=window.innerWidth-(window.innerWidth/hand.getAttrs().order.length/2*(hand.getAttrs().order.length-i));
+    hand.children[i].getAttrs().x=window.innerWidth+cardWidth-(window.innerWidth/hand.children.length*(hand.children.length-i));
+    //deck.getAttrs().cards[cardPos].x=window.innerWidth-window.innerWidth/7/2;
+    log('collections','setCardPos','\thand.children['+i+'].y: '+(window.innerHeight-(window.innerHeight/4/2)));
+    hand.children[i].getAttrs().y=(window.innerHeight-(window.innerHeight/4/2));
+  }
+  /*
+  log('collections','setCardPos','drawing card layer');
+  cardFrontLayer.draw();
+  */
 }
 function resetCardPos(){
   for(var i in this.getAttrs().order){
