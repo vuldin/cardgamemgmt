@@ -2,7 +2,7 @@
  * Copyright 2012 Joshua Purcell <joshua.purcell@gmail.com>
  * 
  * This file is part of cardgamemgmt (CGM)
- * http://sourceforge.net/p/cardgamemgmt/wiki/Home/
+ * http://joshuapurcell.github.com/cardgamemgmt/
  * 
  * CGM is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public
@@ -78,13 +78,18 @@ function clearSelection(){
     selectGroup.children[i].setShadowOffset('');
     selectGroup.children[i].setShadowBlur(5);
     cardFrontLayer.draw();
+    /*
+    log('cards','clearSelection','adding card listeners');
+    addCardListeners(selectGroup.children[i]);
+    */
+    log('cards','clearSelection','making selectGroup undraggable');
+    selectGroup.draggable(false);
   }
   log('cards','clearSelection','removing '+selectGroup.children.length+' children');
   selectGroup.removeChildren();
   log('cards','clearSelection',selectGroup.children.length+' cards in selectGroup');
 }
-function createCard(cardPos){
-  var card = new Kinetic.Rect(deck.getAttrs().cards[cardPos]);
+function addCardListeners(card){
   /* TODO dynamically add listener functions to each card as needed
    * these functions would need to be moved out of createCard */
   /* TODO should card be Kinetic.Text (instead of Rect)? */
@@ -118,8 +123,7 @@ function createCard(cardPos){
     log('cards','dragStart','clearing mousedownTimeout');
     clearTimeout(mousedownTimeout);
   });
-  card.on('dragend',function(){
-  });
+  card.on('dragend',function(){});
   card.on('dragmove',function(){
     document.body.style.cursor='pointer';
     this.setShadowColor('#3f3f3f');
@@ -152,10 +156,13 @@ function createCard(cardPos){
       cardFrontLayer.draw();
     },1000);
   }); // end mousedown
-  
   card.on('mouseup touchend',function(){
     mouseUp(card);
   });
+  return card;
+}
+function createCard(cardPos){
+  var card=addCardListeners(new Kinetic.Rect(deck.getAttrs().cards[cardPos]));
   cardFrontLayer.add(card);
   return card;
-}; // end createCard function
+}

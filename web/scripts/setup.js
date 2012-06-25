@@ -2,7 +2,7 @@
  * Copyright 2012 Joshua Purcell <joshua.purcell@gmail.com>
  * 
  * This file is part of cardgamemgmt (CGM)
- * http://sourceforge.net/p/cardgamemgmt/wiki/Home/
+ * http://joshuapurcell.github.com/cardgamemgmt/
  * 
  * CGM is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public
@@ -53,8 +53,7 @@ window.onload = function(){
     */
   });
   cardFrontLayer = new Kinetic.Layer();
-  /* TODO populate player and session variables with values from server
-   * server.js should handle creating the session (and player/opponent) objects */
+  /* TODO server.js should handle creating the session (and player/opponent) objects */
   player = {id:'PLAYERID'};
   opponent = {id:'OPPONENTID'};
   session = {
@@ -62,8 +61,7 @@ window.onload = function(){
     players:[player,opponent],
     admins:[]
   };
-  /* TODO should deck be the same type of collection as other card collections (Kinetic group)?
-   * deck doesn't need to be a kinetic group since it rarely (if ever) will need to be fully represented on the page
+  /* deck doesn't need to be a kinetic group since it rarely (if ever) will need to be fully represented on the page
    * there may be benefits to having all card collections behave in the same way (regardless of if they appear fully on the page */
   deck = new Kinetic.Group({
     draggable: false,
@@ -71,12 +69,18 @@ window.onload = function(){
     name: 'deck1',
     owner: player.id,
     session: session.id,
-    cards:[], /* TODO the deck object should only provide card information via server request */
-    order:[],
-    shuffle:shuffle,
-    addCardsToTop:addCardsToTop,
-    drawCards:drawCards,
-    play:playCard
+    cards:[], /* TODO remove... this info should be provided by server.js */
+    pos:[],
+    shuffle:shuffle, /* shuffles posArray */
+    addCardToTop:addCardToTop,
+    drawCard:drawCard,
+    addCard:addCard,
+    removeCard:removeCard,
+    playCard:playCard,
+    discardCard:discardCard,
+    exileCard:exileCard,
+    play:playCard,
+    setCardLoc:setCardLoc
   });
   hand = new Kinetic.Group({
     draggable:false,
@@ -84,7 +88,18 @@ window.onload = function(){
     name:'hand1',
     owner:player.id,
     session:session.id,
-    order:[],
+    pos:[],
+    play:playCard,
+    setCardLoc:setCardLoc,
+    resetCardPos:resetCardPos
+  });
+  play = new Kinetic.Group({
+    draggable:false,
+    id:'PLAYID',
+    name:'play1',
+    owner:player.id,
+    session:session.id,
+    pos:[],
     play:playCard,
     setCardPos:setCardPos,
     resetCardPos:resetCardPos
@@ -99,6 +114,11 @@ window.onload = function(){
   var miny=cardHeight/2+extra;
   var maxy=window.innerHeight-miny-extra;
   /* TODO remove card generating for loop */
+  /* TODO card generation loop details
+   * creates certain number of cards and adds to a cardArray
+   * sends cardArray to server.js
+   * server.js shuffles cardArray (either directly or by creating a server-side posArray) once cardArray is loaded 
+   * deck collection creates posArray representing locations in the server-side cardArray where cards in the deck collection are located */
   var cardAmount=60;
   var handAmount=4;
   var cardJSONarr=[];
@@ -111,7 +131,6 @@ window.onload = function(){
       player: player.id,
       session: session.id,
       deck: deck.id,
-      inPlay: true, // is this represented on the screen?
       selected: false, // is this the most recent one selected
       turned: false,
       flipped: false,
@@ -120,7 +139,11 @@ window.onload = function(){
       strokeWidth: 1,
       centerOffset: {
         x: cardWidth / 2,
-        y: cardHeight / 2
+    	y: cardHeight / 2
+    	/*
+    	x: cardWidth,
+        y: cardHeight
+        */
       },
       draggable: true,
       width: cardWidth,
@@ -145,7 +168,7 @@ window.onload = function(){
   colorNum=0;
   for(var i in startingHand){
     // add this card reference to hand
-    hand.getAttrs().order.push(startingHand[i]);
+    hand.getAttrs().pos.push(startingHand[i]);
     // set color to next from colors array
     newCard=createCard(startingHand[i]);
     newCard.setFill(colors[colorNum]);
